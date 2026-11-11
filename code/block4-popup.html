@@ -1,0 +1,361 @@
+<style>
+  /* Zero Block: HTML-элемент на всю ширину, без масштабирования Тильды; старые элементы блока скрыты */
+  .t396__elem:has(#adv-pop), .t396__elem:has(#adv-pop) .tn-atom {
+    left: 0 !important; top: 0 !important; width: 100% !important; height: auto !important; zoom: 1 !important;
+  }
+  .t396__artboard:has(#adv-pop) .t396__elem:not(:has(#adv-pop)) { display: none !important; }
+  .t396__artboard:has(#adv-pop), .t396__artboard:has(#adv-pop) .t396__carrier, .t396__artboard:has(#adv-pop) .t396__filter {
+    height: var(--adv-h, 900px) !important; min-height: 0 !important;
+  }
+
+  /* ===== Блок 4. Поп-ап подарка дня ===== */
+  .adv-pop, .adv-pop * { box-sizing: border-box; }
+  .adv-pop {
+    --u: calc(min(100vw, 1920px) / 1920);
+    padding: calc(46 * var(--u)) 0;
+    background: #f2f3f5;
+    font-family: 'Manrope', Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "lnum" 1, "pnum" 1;
+  }
+  .adv-pop__wrap {
+    width: calc(1550 * var(--u)); margin: 0 auto;
+    display: flex; flex-direction: column; gap: calc(20 * var(--u));
+  }
+  .adv-pop a { text-decoration: none; }
+  .adv-pop__btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: .45em;
+    flex: none; cursor: pointer; border: 0;
+    text-transform: uppercase; white-space: nowrap; line-height: 1.2;
+    transition: transform .25s ease, filter .25s ease, box-shadow .25s ease;
+  }
+  .adv-pop__btn:hover { filter: brightness(1.08); }
+  .adv-pop__btn:active { transform: scale(.98); }
+  .adv-pop__btn img { display: block; flex: none; }
+
+  /* Поделиться */
+  .adv-pop__share {
+    display: flex; align-items: center; justify-content: center; gap: calc(34 * var(--u));
+    height: calc(138 * var(--u));
+    background: #0f182d; border-radius: calc(30 * var(--u));
+  }
+  .adv-pop__share-btn {
+    width: calc(272 * var(--u)); height: calc(78.5 * var(--u));
+    border-radius: calc(11.8 * var(--u));
+    background: radial-gradient(60% 80% at 50% 0%, rgba(255, 245, 232, .7), rgba(255, 245, 232, 0)), #fce6cd;
+    color: #704f2a; font-weight: 800; font-size: max(10px, calc(13.6 * var(--u)));
+  }
+  .adv-pop__share-text {
+    margin: 0; color: #fff;
+    font-weight: 600; font-size: calc(29.6 * var(--u)); line-height: 1.12; letter-spacing: -.05em;
+  }
+  .adv-pop__share-text span { color: #f6e4d8; }
+  .adv-pop .m { display: none; }
+
+  /* Карточка дня */
+  .adv-pop__card {
+    position: relative; overflow: hidden; isolation: isolate;
+    height: calc(650 * var(--u));
+    border-radius: calc(40 * var(--u));
+    background: #0f182d;
+    display: flex; flex-direction: column; align-items: center;
+    padding-top: calc(84 * var(--u));
+    color: #fff; text-align: center;
+  }
+  .adv-pop__bg {
+    position: absolute; inset: 0; z-index: -1;
+    width: 100%; height: 100%; object-fit: cover; object-position: 50% 50%;
+  }
+  .adv-pop__tags { display: flex; gap: calc(15 * var(--u)); }
+  .adv-pop__tag {
+    display: inline-flex; align-items: center; justify-content: center; gap: .5em;
+    width: calc(168 * var(--u)); height: calc(64 * var(--u));
+    border: max(1px, calc(1.7 * var(--u))) solid #fff; border-radius: calc(13.6 * var(--u));
+    font-weight: 700; font-size: max(11px, calc(16 * var(--u))); line-height: 1; text-transform: uppercase;
+  }
+  .adv-pop__tag--date { background: #fff; color: #3b507d; }
+  .adv-pop__tag img { width: .85em; height: auto; display: block; }
+  .adv-pop__title {
+    margin: calc(30 * var(--u)) 0 0;
+    font-weight: 600; font-size: calc(60 * var(--u)); line-height: .95; letter-spacing: -.02em;
+  }
+  .adv-pop__desc {
+    margin: calc(20 * var(--u)) 0 0;
+    font-weight: 500; font-size: calc(28 * var(--u)); line-height: 1.22; letter-spacing: -.02em;
+  }
+  .adv-pop__gift {
+    margin-top: calc(30 * var(--u));
+    width: calc(391 * var(--u)); height: calc(127 * var(--u));
+    border-radius: calc(19.5 * var(--u));
+    background: #3b507d; color: #fff;
+    font-weight: 600; font-size: calc(19.5 * var(--u));
+    box-shadow: 0 calc(58 * var(--u)) calc(54 * var(--u)) calc(-39 * var(--u)) rgba(59, 80, 125, .35);
+  }
+  .adv-pop__gift img { width: .87em; height: auto; }
+
+  /* Обучение */
+  .adv-pop__promo {
+    position: relative; overflow: hidden;
+    height: calc(202 * var(--u));
+    border-radius: calc(30 * var(--u));
+    background: #f6e4d8 url("https://dashkoy1.github.io/advent-calendar/assets/popup/promo.webp") center / cover no-repeat;
+    display: flex; align-items: center; justify-content: center; gap: calc(53 * var(--u));
+    color: #14284b;
+  }
+  .adv-pop__photos { display: none; }
+  .adv-pop__more {
+    width: calc(327.6 * var(--u)); height: calc(106.5 * var(--u));
+    border-radius: calc(16.4 * var(--u));
+    background: #0f182d; color: #fff;
+    font-weight: 600; font-size: max(11px, calc(16.4 * var(--u)));
+    box-shadow: 0 calc(49 * var(--u)) calc(45 * var(--u)) calc(-33 * var(--u)) rgba(15, 24, 45, .43);
+  }
+  .adv-pop__more--m { display: none; }
+  .adv-pop__promo-text { margin: 0; }
+  .adv-pop__promo-title {
+    display: block;
+    font-weight: 700; font-size: calc(33.3 * var(--u)); line-height: 1; letter-spacing: -.05em;
+  }
+  .adv-pop__promo-sub {
+    display: flex; align-items: center; gap: calc(10 * var(--u));
+    margin-top: calc(9 * var(--u));
+    font-weight: 400; font-size: calc(25 * var(--u)); line-height: 1; letter-spacing: -.05em;
+  }
+  .adv-pop__promo-sub img { width: calc(23 * var(--u)); height: auto; display: block; }
+
+  /* ===== Планшет и телефон: колонка по макету «адаптив» ===== */
+  @media (max-width: 1099px) {
+    .adv-pop {
+      --m: calc(min(100vw - 32px, 480px) / 360);
+      padding: 30px 0 40px;
+    }
+    .adv-pop__wrap { width: calc(360 * var(--m)); gap: calc(20 * var(--m)); }
+
+    .adv-pop__share {
+      flex-direction: column; gap: calc(14 * var(--m));
+      height: auto; padding: calc(26 * var(--m)) calc(20 * var(--m)) calc(25 * var(--m));
+      border-radius: calc(30 * var(--m));
+    }
+    .adv-pop__share-text {
+      order: -1; text-align: center;
+      font-size: calc(21.8 * var(--m)); line-height: .95; letter-spacing: -.02em;
+    }
+    .adv-pop .d { display: none; }
+    .adv-pop .m { display: inline; }
+    .adv-pop__share-btn {
+      width: calc(194 * var(--m)); height: calc(56 * var(--m));
+      border-radius: calc(8.4 * var(--m)); font-size: max(10px, calc(9.7 * var(--m)));
+    }
+
+    .adv-pop__card {
+      height: auto; padding: calc(65 * var(--m)) calc(34 * var(--m));
+      border-radius: calc(30 * var(--m));
+      background: #05142a;
+    }
+    .adv-pop__bg { object-position: 22% 50%; }
+    .adv-pop__card::after {
+      content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+      background: radial-gradient(75% 55% at 50% 50%, rgba(5, 20, 42, .55), rgba(5, 20, 42, 0));
+    }
+    .adv-pop__tags { gap: calc(9.5 * var(--m)); width: 100%; }
+    .adv-pop__tag {
+      flex: 1 1 0; width: auto; height: calc(52 * var(--m));
+      border-width: 1.4px; border-radius: calc(11.4 * var(--m));
+      font-size: max(11px, calc(13.3 * var(--m)));
+    }
+    .adv-pop__title { margin-top: calc(19 * var(--m)); font-size: calc(35 * var(--m)); }
+    .adv-pop__desc { margin-top: calc(14 * var(--m)); max-width: none; font-size: calc(16.8 * var(--m)); }
+    .adv-pop__gift {
+      flex-direction: row-reverse;
+      margin-top: calc(26 * var(--m));
+      width: 100%; height: calc(82 * var(--m));
+      border-radius: calc(12.6 * var(--m));
+      font-size: calc(15.2 * var(--m));
+      box-shadow: 0 calc(38 * var(--m)) calc(35 * var(--m)) calc(-25 * var(--m)) rgba(59, 80, 125, .5);
+    }
+
+    .adv-pop__promo {
+      display: block; height: calc(235 * var(--m));
+      border-radius: calc(30 * var(--m));
+      background: #f6e4d8;
+      text-align: center;
+    }
+    .adv-pop__promo .adv-pop__more { display: none; }
+    .adv-pop__promo-text {
+      width: calc(310 * var(--m)); margin: calc(24 * var(--m)) auto 0;
+      color: #06152b; font-size: calc(19.6 * var(--m)); line-height: 1.02; letter-spacing: -.045em;
+    }
+    .adv-pop__promo-title { display: inline; font-weight: 600; font-size: inherit; letter-spacing: inherit; }
+    .adv-pop__promo-sub { display: inline; margin: 0; font-size: inherit; letter-spacing: -.03em; }
+    .adv-pop__promo-sub img { display: none; }
+    .adv-pop__photos { display: block; }
+    .adv-pop__photo {
+      position: absolute; overflow: hidden;
+      border-radius: calc(12 * var(--m));
+      box-shadow: 0 8px 24px -10px rgba(6, 21, 43, .35);
+      transform: translate(-50%, -50%) rotate(var(--r));
+    }
+    .adv-pop__photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
+    .adv-pop__photo--1 { --r: -22.3deg; left: calc(84.9 * var(--m)); top: calc(208.4 * var(--m)); width: calc(103.4 * var(--m)); height: calc(131.9 * var(--m)); z-index: 2; }
+    .adv-pop__photo--2 { --r: 11.5deg; left: calc(176.5 * var(--m)); top: calc(214 * var(--m)); width: calc(125.6 * var(--m)); height: calc(160.2 * var(--m)); z-index: 3; }
+    .adv-pop__photo--3 { --r: -20.5deg; left: calc(279.4 * var(--m)); top: calc(209.4 * var(--m)); width: calc(100.4 * var(--m)); height: calc(128 * var(--m)); z-index: 1; }
+
+    .adv-pop__more--m {
+      display: inline-flex; width: 100%; height: calc(101.3 * var(--m));
+      border-radius: calc(15.6 * var(--m));
+      background: #06152a; font-size: calc(18.8 * var(--m));
+      box-shadow: 0 calc(46.8 * var(--m)) calc(42.9 * var(--m)) calc(-31.2 * var(--m)) rgba(5, 20, 42, .25);
+    }
+  }
+
+  /* Уведомление «Ссылка скопирована» */
+  .adv-share-toast {
+    position: fixed; left: 50%; bottom: 28px; z-index: 100000;
+    transform: translate(-50%, 12px); opacity: 0;
+    padding: 12px 18px; border-radius: 12px;
+    background: rgba(16, 32, 65, .92); color: #fff;
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+    box-shadow: 0 16px 34px -14px rgba(0, 0, 0, .6);
+    font: 500 14px/1.3 'Manrope', Arial, sans-serif; text-align: center;
+    pointer-events: none; transition: opacity .3s ease, transform .3s ease;
+    max-width: calc(100vw - 32px);
+  }
+  .adv-share-toast.is-on { opacity: 1; transform: translate(-50%, 0); }
+</style>
+
+<section class="adv-pop" id="adv-pop" aria-label="Подарок дня">
+  <div class="adv-pop__wrap">
+
+    <div class="adv-pop__share">
+      <a class="adv-pop__btn adv-pop__share-btn" href="#share">Поделиться календарем</a>
+      <p class="adv-pop__share-text">
+        <span class="d" style="color:#fff">Поделись этим <span>Advent-календарем</span><br>с друзьями и коллегами 🤍</span>
+        <span class="m">Поделись Advent-<br>календарем с друзьями →</span>
+      </p>
+    </div>
+
+    <div class="adv-pop__card">
+      <img class="adv-pop__bg" src="https://dashkoy1.github.io/advent-calendar/assets/popup/day-02.webp" alt="" loading="lazy" decoding="async">
+      <div class="adv-pop__tags">
+        <span class="adv-pop__tag adv-pop__tag--date"><img src="https://dashkoy1.github.io/advent-calendar/assets/popup/cal.svg" alt="" width="13" height="14">2 декабря</span>
+        <span class="adv-pop__tag">#палитры</span>
+      </div>
+      <h3 class="adv-pop__title">Подборка зимних<br>цветовых палитр</h3>
+      <p class="adv-pop__desc">Ребята, зима уже здесь!<br>Знаем, как важно попасть в цвет, —<br>дарим вам целую подборку!</p>
+      <a class="adv-pop__btn adv-pop__gift" href="#" data-adv-gift><img src="https://dashkoy1.github.io/advent-calendar/assets/img/gift.svg" alt="" width="17" height="16">Открыть подарок дня</a>
+    </div>
+
+    <div class="adv-pop__promo">
+      <a class="adv-pop__btn adv-pop__more" href="https://mono-webdesign.ru/ai_course" target="_blank" rel="noopener">Узнать подробнее</a>
+      <p class="adv-pop__promo-text">
+        <span class="adv-pop__promo-title">Если вы тоже хотите создавать<span class="d"><br></span> ВАУ-сайты, фото и видео через ИИ<span class="m">,</span></span>
+        <span class="adv-pop__promo-sub"><img src="https://dashkoy1.github.io/advent-calendar/assets/popup/arrow.svg" alt="" width="25" height="15"><span class="d">то приходите к нам на обучение</span><span class="m">то&nbsp;приходите к&nbsp;нам на&nbsp;обучение&nbsp;→</span></span>
+      </p>
+      <div class="adv-pop__photos" aria-hidden="true">
+        <span class="adv-pop__photo adv-pop__photo--1"><img src="https://dashkoy1.github.io/advent-calendar/assets/popup/promo-m-1.webp" alt="" loading="lazy"></span>
+        <span class="adv-pop__photo adv-pop__photo--2"><img src="https://dashkoy1.github.io/advent-calendar/assets/popup/promo-m-2.webp" alt="" loading="lazy"></span>
+        <span class="adv-pop__photo adv-pop__photo--3"><img src="https://dashkoy1.github.io/advent-calendar/assets/popup/promo-m-3.webp" alt="" loading="lazy"></span>
+      </div>
+    </div>
+    <a class="adv-pop__btn adv-pop__more adv-pop__more--m" href="https://mono-webdesign.ru/ai_course" target="_blank" rel="noopener">Узнать подробнее</a>
+
+  </div>
+</section>
+
+<script>
+(function () {
+  var sec = document.getElementById('adv-pop');
+  if (!sec) { return; }
+
+  /* Ссылка на подарок дня. Пока пусто — кнопка показывает подсказку. */
+  var GIFT_URL = '';
+
+  /* Zero Block: высота артборда = высоте секции */
+  var ab = sec.closest('.t396__artboard');
+  if (ab) {
+    var fit = function () { ab.style.setProperty('--adv-h', Math.ceil(sec.getBoundingClientRect().height) + 'px'); };
+    fit();
+    if ('ResizeObserver' in window) { new ResizeObserver(fit).observe(sec); }
+    window.addEventListener('resize', fit);
+    window.addEventListener('load', fit);
+  }
+
+  var toast = null, toastT = 0;
+  function showToast(t) {
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.className = 'adv-share-toast';
+      toast.setAttribute('role', 'status');
+      toast.setAttribute('aria-live', 'polite');
+      document.body.appendChild(toast);
+    }
+    toast.textContent = t;
+    toast.classList.add('is-on');
+    clearTimeout(toastT);
+    toastT = setTimeout(function () { toast.classList.remove('is-on'); }, 2600);
+  }
+
+  var gift = sec.querySelector('[data-adv-gift]');
+  if (gift) {
+    if (GIFT_URL) {
+      gift.href = GIFT_URL;
+      gift.target = '_blank';
+      gift.rel = 'noopener';
+    } else {
+      gift.addEventListener('click', function (e) {
+        e.preventDefault();
+        showToast('Подарок откроется в свой день 🎁');
+      });
+    }
+  }
+
+  /* Поделиться календарём: любая ссылка #share на странице */
+  if (window.advShareReady) { return; }
+  window.advShareReady = true;
+  var SHARE = {
+    title: 'Advent-календарь 2027',
+    text: 'Advent-календарь от Даши и Ромы Mono: 31 подарок по дизайну и нейросетям, каждый день новый 🎁',
+    url: 'https://mono-webdesign.ru/advent2027'
+  };
+  function legacyCopy() {
+    var full = SHARE.text + ' ' + SHARE.url;
+    var ta = document.createElement('textarea');
+    ta.value = full;
+    ta.setAttribute('readonly', '');
+    ta.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0';
+    document.body.appendChild(ta);
+    ta.select();
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch (err) { ok = false; }
+    document.body.removeChild(ta);
+    showToast(ok ? 'Ссылка скопирована, отправь её друзьям 💛' : 'Скопируй ссылку: ' + SHARE.url);
+  }
+  function copyLink() {
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(SHARE.text + ' ' + SHARE.url).then(function () {
+        showToast('Ссылка скопирована, отправь её друзьям 💛');
+      }, legacyCopy);
+    } else {
+      legacyCopy();
+    }
+  }
+  function share() {
+    if (navigator.share) {
+      navigator.share({ title: SHARE.title, text: SHARE.text, url: SHARE.url }).catch(function (err) {
+        if (err && err.name === 'AbortError') { return; }
+        copyLink();
+      });
+    } else {
+      copyLink();
+    }
+  }
+  window.advShare = share;
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('a[href="#share"], a[href$="#share"], [data-adv-share]');
+    if (!a) { return; }
+    e.preventDefault();
+    e.stopPropagation();
+    share();
+  }, true);
+})();
+</script>
