@@ -126,7 +126,7 @@
   /* ===== Планшет и телефон: колонка по макету «адаптив» ===== */
   @media (max-width: 1099px) {
     .adv-pop {
-      --m: calc(min(100vw - 32px, 480px) / 360);
+      --m: calc(min(100vw - 32px, 480px) / 400);
       padding: 30px 0 40px;
     }
     .adv-pop__wrap { width: calc(360 * var(--m)); gap: calc(20 * var(--m)); }
@@ -148,7 +148,7 @@
     }
 
     .adv-pop__card {
-      height: auto; padding: calc(65 * var(--m)) calc(34 * var(--m));
+      height: auto; padding: calc(84 * var(--m)) calc(34 * var(--m)) calc(80 * var(--m));
       border-radius: calc(30 * var(--m));
       background: #05142a;
     }
