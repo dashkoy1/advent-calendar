@@ -1,0 +1,113 @@
+<style>
+  /* ===== Блок «Сделали с нейросетями»: снег и парение названий (HTML-элемент в Zero Block) ===== */
+  .t396__elem:has(#adv-ai-fx) { pointer-events: none !important; z-index: 60 !important; }
+  .t396__elem:has(#adv-ai-fx), .t396__elem:has(#adv-ai-fx) .tn-atom {
+    left: 0 !important; top: 0 !important; width: 100% !important; height: 100% !important;
+  }
+  .adv-ai-fx { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+  .adv-ai-fx canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+  /* лёгкое «парение» названий нейросетей: каждое в своём ритме */
+  .t396__artboard:has(#adv-ai-fx) .t396__elem[data-elem-type="button"] .tn-atom {
+    animation: advAiFloat var(--fd, 5s) ease-in-out var(--fl, 0s) infinite;
+    will-change: transform;
+  }
+  @keyframes advAiFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .t396__artboard:has(#adv-ai-fx) .t396__elem[data-elem-type="button"] .tn-atom { animation: none; }
+    .adv-ai-fx canvas { display: none; }
+  }
+</style>
+
+<div class="adv-ai-fx" id="adv-ai-fx" aria-hidden="true"><canvas></canvas></div>
+
+<script>
+(function () {
+  var root = document.getElementById('adv-ai-fx');
+  if (!root) { return; }
+  var ab = root.closest('.t396__artboard');
+  var box = ab || root;
+
+  /* разный ритм парения у каждого названия */
+  if (ab) {
+    var D = [4.6, 5.3, 4.9, 5.6];
+    var btns = ab.querySelectorAll('.t396__elem[data-elem-type="button"] .tn-atom');
+    Array.prototype.forEach.call(btns, function (b, i) {
+      b.style.setProperty('--fd', D[i % D.length] + 's');
+      b.style.setProperty('--fl', (-1.3 * i) + 's');
+    });
+  }
+
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) { return; }
+
+  /* снег: как на первом экране, чуть реже */
+  var cv = root.querySelector('canvas');
+  var ctx = cv.getContext('2d');
+  var dpr = Math.min(window.devicePixelRatio || 1, 2);
+  var W = 0, H = 0, flakes = [], running = false, visible = false, raf = 0, last = 0;
+
+  function make(randomY) {
+    var r = Math.random();
+    return {
+      x: Math.random() * W,
+      y: randomY ? Math.random() * H : -10,
+      s: 0.6 + r * r * 2.2,
+      v: 14 + r * 34,
+      a: 0.25 + Math.random() * 0.55,
+      p: Math.random() * 6.28,
+      w: 0.4 + Math.random() * 0.8
+    };
+  }
+  function resize() {
+    W = box.clientWidth; H = box.clientHeight;
+    if (!W || !H) { return; }
+    cv.width = W * dpr; cv.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    var n = Math.round(Math.min(100, W / 14));
+    flakes = [];
+    while (n--) { flakes.push(make(true)); }
+  }
+  function tick(t) {
+    if (!running) { return; }
+    var dt = Math.min(0.05, (t - (last || t)) / 1000);
+    last = t;
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = '#fff';
+    var i = flakes.length, f;
+    while (i--) {
+      f = flakes[i];
+      f.p += dt * f.w;
+      f.y += f.v * dt;
+      f.x += Math.sin(f.p) * 12 * dt;
+      if (f.y > H + 10) { flakes[i] = make(false); continue; }
+      ctx.globalAlpha = f.a;
+      ctx.beginPath();
+      ctx.arc(f.x, f.y, f.s, 0, 6.283);
+      ctx.fill();
+    }
+    raf = requestAnimationFrame(tick);
+  }
+  function update() {
+    var should = visible && !document.hidden;
+    if (should && !running) { running = true; last = 0; raf = requestAnimationFrame(tick); }
+    if (!should && running) { running = false; cancelAnimationFrame(raf); }
+  }
+  resize();
+  var rt;
+  window.addEventListener('resize', function () {
+    clearTimeout(rt);
+    rt = setTimeout(resize, 200);
+  });
+  window.addEventListener('load', resize);
+  document.addEventListener('visibilitychange', update);
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(function (e) { visible = e[0].isIntersecting; update(); }).observe(box);
+  } else {
+    visible = true;
+  }
+  update();
+})();
+</script>
