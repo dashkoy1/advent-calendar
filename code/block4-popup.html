@@ -55,11 +55,11 @@
   /* Карточка дня */
   .adv-pop__card {
     position: relative; overflow: hidden; isolation: isolate;
-    height: calc(650 * var(--u));
+    min-height: calc(650 * var(--u));
     border-radius: calc(40 * var(--u));
     background: #0f182d;
     display: flex; flex-direction: column; align-items: center;
-    padding-top: calc(84 * var(--u));
+    padding: calc(84 * var(--u)) calc(60 * var(--u)) calc(85 * var(--u));
     color: #fff; text-align: center;
   }
   .adv-pop__bg {
@@ -78,9 +78,10 @@
   .adv-pop__title {
     margin: calc(30 * var(--u)) 0 0;
     font-weight: 600; font-size: calc(56.4 * var(--u)); line-height: .957; letter-spacing: -.02em;
+    max-width: calc(760 * var(--u));
   }
   .adv-pop__desc {
-    margin: calc(20 * var(--u)) 0 0;
+    margin: calc(20 * var(--u)) 0 0; max-width: calc(620 * var(--u));
     font-weight: 500; font-size: calc(26.3 * var(--u)); line-height: 1.29; letter-spacing: -.02em;
   }
   .adv-pop__gift {
@@ -164,7 +165,8 @@
       font-size: max(11px, calc(12.5 * var(--m))); gap: calc(7 * var(--m));
     }
     .adv-pop__title { margin: calc(19 * var(--m)) calc(-24 * var(--m)) 0; font-size: calc(32.9 * var(--m)); line-height: .957; }
-    .adv-pop__desc { margin: calc(14 * var(--m)) calc(-24 * var(--m)) 0; font-size: calc(15.8 * var(--m)); line-height: 1.29; }
+    .adv-pop__title { max-width: none; }
+    .adv-pop__desc { max-width: none; margin: calc(14 * var(--m)) calc(-24 * var(--m)) 0; font-size: calc(15.8 * var(--m)); line-height: 1.29; }
     .adv-pop__gift {
       flex-direction: row-reverse; gap: calc(10.7 * var(--m));
       margin-top: calc(27.5 * var(--m));
