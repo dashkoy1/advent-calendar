@@ -95,6 +95,9 @@
   tx['letterspacing-res-360'] = '-0.4'; tx['letterspacing-res-480'] = '-0.53'; tx['letterspacing-res-640'] = '-0.71';
   add('text', tx);
 
+  /* в буфере Тильды первый элемент — верхний слой: разворачиваем порядок */
+  out.reverse();
+  out.forEach(function (e, i) { e.index = i; e.props.zindex = String(out.length - i); });
   localStorage.setItem('tn_store_buffer__copy-paste', JSON.stringify({ res: 1200, data: out, timestamp: Date.now() }));
   window.__advBuilt = out.length;
 })();
