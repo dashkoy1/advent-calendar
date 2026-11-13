@@ -71,11 +71,11 @@
   var bg = clean(tpl.shape);
   bg.figure = 'rectangle'; bg.bgcolor = '#f6e4d8'; bg.borderwidth = '0px 0px 0px 0px'; bg.borderradius = '0px 0px 0px 0px';
   bg.layer = 'Подложка снизу'; bg.name = 'Подложка снизу';
-  place(bg, [0, 875.6, 1200, 163.4], [0, 600, 360, 45]);
+  place(bg, [0, 875.6, 1200, 163.4], [0, 330, 360, 40]);
   add('shape', bg);
 
   /* 2. фото с ноутбуком */
-  image('Фото с ноутбуком', 'laptop-tmp.webp', 1446, 918, [0, 276.9, 1200, 761.9], [0, 230, 360, 415], [56, 30], 'cover');
+  image('Фото с ноутбуком', 'laptop-tmp.webp', 1446, 918, [0, 276.9, 1200, 761.9], [0, 250, 360, 300], [56, 26], 'cover');
   /* 3. заголовок (вектор) и 4. Advent */
   image('Заголовок', 'title.svg', 1254, 318, [203.06, 113.9, 783.75, 198.75], [15, 70, 330, 83.7], null, 'contain');
   image('Advent', 'advent-outline.svg', 666, 386, [259.5, 37.4, 416.25, 241.25], [38.8, 37.8, 175.3, 101.6], null, 'contain');
@@ -85,13 +85,13 @@
   chip('NanoBanana', [620.5, 345.6, 167.9, 51.75], [20, 228, 150, 42]);
   chip('Adobe FireFlay', [857.1, 345.6, 167.9, 51.75], [180, 228, 160, 42]);
   /* 9. карточка профиля */
-  image('Карточка профиля', 'profile-card.webp', 590, 170, [510, 910, 180, 51.9], [105, 540, 150, 43.25], [7, 6], 'cover');
+  image('Карточка профиля', 'profile-card.webp', 590, 170, [510, 910, 180, 51.9], [105, 476, 150, 43.25], [7, 6], 'cover');
   /* 10. подпись */
   var tx = clean(tpl.text);
   tx.text = 'А еще в 2026 году <strong>благодаря ИИ набрали 20&nbsp;000+ аудитории,</strong><br>заработали&nbsp; 450&nbsp;000₽ только с одного ИИ-заказа и т.п.';
   tx.color = '#ffffff'; tx.align = 'center'; tx.fontweight = '400'; tx.lineheight = '1.3'; tx.letterspacing = '-0.69';
   tx.lettercase = ''; tx.layer = 'Подпись'; tx.name = 'Подпись'; tx.heightmode = 'auto';
-  place(tx, [410, 971.9, 380, null], [20, 592, 320, null], [13.8, 11.5]);
+  place(tx, [410, 971.9, 380, null], [20, 564, 320, null], [13.8, 11.5]);
   tx['letterspacing-res-360'] = '-0.4'; tx['letterspacing-res-480'] = '-0.53'; tx['letterspacing-res-640'] = '-0.71';
   add('text', tx);
 
