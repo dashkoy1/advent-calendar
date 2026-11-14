@@ -73,6 +73,11 @@
     display: flex; flex-direction: column; gap: calc(20 * var(--u));
   }
   .adv-pop a { text-decoration: none; }
+  /* порядок: сверху призыв к курсу, ниже подарок, внизу «Поделиться» */
+  .adv-pop__promo { order: 1; }
+  .adv-pop__more--m { order: 2; }
+  .adv-pop__card { order: 3; }
+  .adv-pop__share { order: 4; }
   .adv-pop__btn {
     display: inline-flex; align-items: center; justify-content: center; gap: .45em;
     flex: none; cursor: pointer; border: 0;
