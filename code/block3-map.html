@@ -198,6 +198,8 @@
     return 0;
   }
   var today = mskToday();
+  /* ВРЕМЕННО для проверки: эти дни открыты всем раньше срока. Перед запуском очистить: { } */
+  var FORCE_OPEN = { 2: true };
 
   /* Отметки: каждая — одна картинка из Figma (вид: dec — «Декабря», star — цветок, card — карточка) */
   var IMGD = 'https://dashkoy1.github.io/advent-calendar/assets/days/day-';
@@ -221,6 +223,7 @@
     b.style.marginLeft = (-bw / 2).toFixed(1) + 'px';
     b.style.marginTop = (-bh / 2).toFixed(1) + 'px';
     var state = it[0] > today ? 'locked' : (it[0] === today ? 'today' : 'open');
+    if (state === 'locked' && FORCE_OPEN[it[0]]) { state = 'open'; }
     b.classList.add('is-' + state);
     b.setAttribute('aria-label', 'День ' + it[0] + (state === 'locked' ? ', откроется ' + it[0] + ' ' + MONTHS : ''));
     var inner = document.createElement('span');
