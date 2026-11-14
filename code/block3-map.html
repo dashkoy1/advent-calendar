@@ -1,0 +1,743 @@
+<style>
+  /* Zero Block: растягиваем HTML-элемент на весь артборд */
+  .t396__elem:has(.adv-map), .t396__elem:has(.adv-map) .tn-atom {
+    left: 0 !important; top: 0 !important; width: 100% !important; height: 100% !important;
+  }
+
+  /* ===== Блок 3. Карта-деревня ===== */
+  .adv-map, .adv-map * { box-sizing: border-box; }
+  .adv-map {
+    position: absolute; inset: 0; overflow: hidden;
+    background: #0b1530;
+    font-family: 'Manrope', Arial, sans-serif;
+    -webkit-user-select: none; user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: pan-y;
+    cursor: default;
+  }
+  .adv-map.is-zoomed { touch-action: none; cursor: grab; }
+  .adv-map.is-dragging { cursor: grabbing; }
+  .adv-map.is-full {
+    position: fixed; inset: 0; z-index: 99990; touch-action: none;
+    width: 100vw; height: 100vh; height: 100dvh;
+  }
+  .adv-map__world {
+    position: absolute; left: 0; top: 0;
+    width: 1000px; height: 1383px;
+    transform-origin: 0 0; will-change: transform;
+  }
+  .adv-map__img {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    display: block; pointer-events: none;
+    -webkit-user-drag: none;
+  }
+
+  /* объёмный слой (WebGL) и снег */
+  .adv-map__gl, .adv-map__snow {
+    position: absolute; left: 0; top: 0; width: 100%; height: 100%;
+    display: block; pointer-events: none;
+  }
+  .adv-map.is-gl .adv-map__img { visibility: hidden; }
+
+  /* отметки дней: картинки из Figma, масштабируются вместе с картой */
+  .adv-pin {
+    position: absolute; padding: 0; margin: 0; border: 0; background: none;
+    appearance: none; -webkit-appearance: none; cursor: pointer;
+  }
+  .adv-pin:focus { outline: none; }
+  .adv-pin__in {
+    position: absolute; inset: 0;
+    transform: scale(var(--ms, 1)); transform-origin: 50% 50%;
+    transition: transform .35s cubic-bezier(.2, .8, .2, 1);
+  }
+  .adv-pin__img {
+    position: absolute; left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    display: block; max-width: none; pointer-events: none;
+    -webkit-user-drag: none;
+    transition: filter .35s ease;
+  }
+  .adv-pin:hover .adv-pin__in, .adv-pin:focus-visible .adv-pin__in { transform: scale(calc(var(--ms, 1) * 1.08)); }
+  .adv-pin:focus-visible .adv-pin__img { filter: drop-shadow(0 0 6px rgba(255, 226, 170, .95)); }
+  /* закрытые дни: приглушены, с замочком */
+  .adv-pin.is-locked .adv-pin__img { filter: saturate(.35) brightness(.72); }
+  .adv-pin.is-locked .adv-pin__in::after {
+    content: ""; position: absolute; right: 2%; top: 2%;
+    width: 30%; aspect-ratio: 1; border-radius: 50%;
+    background: #14284b url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f6e4d8' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='5' y='11' width='14' height='10' rx='2'/%3E%3Cpath d='M8 11V8a4 4 0 0 1 8 0v3'/%3E%3C/svg%3E") center / 58% no-repeat;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .45), 0 0 0 1.5px rgba(246, 228, 216, .7);
+  }
+  /* сегодняшний день: тёплое свечение и мягкая пульсация */
+  .adv-pin.is-today .adv-pin__in { animation: advPinPulse 2.2s ease-in-out infinite; }
+  .adv-pin.is-today .adv-pin__in::before {
+    content: ""; position: absolute; left: 50%; top: 50%;
+    width: 170%; height: 170%; transform: translate(-50%, -50%);
+    border-radius: 50%; pointer-events: none;
+    background: radial-gradient(circle, rgba(255, 214, 140, .75) 0%, rgba(255, 196, 110, .28) 38%, rgba(255, 190, 100, 0) 68%);
+    animation: advPinGlow 2.2s ease-in-out infinite;
+  }
+  @keyframes advPinPulse {
+    0%, 100% { transform: scale(var(--ms, 1)); }
+    50% { transform: scale(calc(var(--ms, 1) * 1.07)); }
+  }
+  @keyframes advPinGlow {
+    0%, 100% { opacity: .55; }
+    50% { opacity: 1; }
+  }
+
+  /* кнопки управления */
+  .adv-map__ui {
+    position: absolute; right: 16px; bottom: calc(16px + var(--vb, 0px)); z-index: 5;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .adv-map__btn {
+    width: 44px; height: 44px; border: 0; border-radius: 12px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(16, 32, 65, .78); color: #fff;
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, .18), 0 10px 24px -10px rgba(0, 0, 0, .6);
+    font: 600 22px/1 'Manrope', Arial, sans-serif;
+    transition: background .2s ease, transform .2s ease;
+  }
+  .adv-map__btn:hover { background: rgba(59, 80, 125, .92); }
+  .adv-map__btn:active { transform: scale(.94); }
+  .adv-map__btn svg { width: 20px; height: 20px; display: block; }
+  .adv-map__btn .adv-ico-close, .adv-map.is-full .adv-map__btn .adv-ico-full { display: none; }
+  .adv-map.is-full .adv-map__btn .adv-ico-close { display: block; }
+
+  /* подсказка и всплывающие сообщения */
+  .adv-map__hint, .adv-map__toast {
+    position: absolute; left: 50%; z-index: 6;
+    transform: translateX(-50%);
+    padding: 10px 16px; border-radius: 12px;
+    background: rgba(16, 32, 65, .85); color: #fff;
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+    font: 500 13px/1.35 'Manrope', Arial, sans-serif; text-align: center;
+    pointer-events: none; white-space: nowrap;
+    transition: opacity .35s ease, transform .35s ease;
+  }
+  .adv-map__hint { top: calc(16px + var(--vt, 0px)); opacity: 0; }
+  .adv-map__hint.is-on { opacity: 1; }
+  .adv-map__toast { bottom: calc(24px + var(--vb, 0px)); opacity: 0; transform: translate(-50%, 8px); }
+  .adv-map__toast.is-on { opacity: 1; transform: translate(-50%, 0); }
+
+  @media (max-width: 639px) {
+    .adv-map__ui { right: 10px; bottom: calc(10px + var(--vb, 0px)); gap: 6px; }
+    .adv-map__btn { width: 40px; height: 40px; border-radius: 10px; }
+    .adv-map__hint, .adv-map__toast { white-space: normal; width: max-content; max-width: 86%; font-size: 12px; }
+    .adv-map__toast { bottom: auto; top: calc(64px + var(--vt, 0px)); transform: translate(-50%, -8px); }
+    .adv-pin { --ms: 1.3; }
+    .adv-pin::before { content: ""; position: absolute; inset: -22%; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .adv-pin.is-today .adv-pin__in, .adv-pin.is-today .adv-pin__in::before { animation: none; }
+  }
+</style>
+
+<div class="adv-map" id="advent-map-view" role="region" aria-label="Карта подарков">
+  <canvas class="adv-map__gl" aria-hidden="true"></canvas>
+  <canvas class="adv-map__snow" aria-hidden="true"></canvas>
+  <div class="adv-map__world">
+    <img class="adv-map__img" crossorigin="anonymous" src="https://dashkoy1.github.io/advent-calendar/assets/map/village-s.webp" alt="Новогодняя деревня с 31 подарком" width="1000" height="1383" decoding="async">
+  </div>
+  <div class="adv-map__hint">Приближай и двигай карту, чтобы найти подарки</div>
+  <div class="adv-map__toast" role="status" aria-live="polite"></div>
+  <div class="adv-map__ui">
+    <button class="adv-map__btn" type="button" data-act="in" aria-label="Приблизить">+</button>
+    <button class="adv-map__btn" type="button" data-act="out" aria-label="Отдалить">&minus;</button>
+    <button class="adv-map__btn" type="button" data-act="reset" aria-label="Показать всю карту">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+    </button>
+    <button class="adv-map__btn" type="button" data-act="full" aria-label="Развернуть карту">
+      <svg class="adv-ico-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+      <svg class="adv-ico-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+</div>
+
+<script>
+(function () {
+  var root = document.getElementById('advent-map-view');
+  if (!root) { return; }
+  var world = root.querySelector('.adv-map__world');
+  var img = root.querySelector('.adv-map__img');
+  var hint = root.querySelector('.adv-map__hint');
+  var toast = root.querySelector('.adv-map__toast');
+  var IMG = 'https://dashkoy1.github.io/advent-calendar/assets/map/village-';
+  var W = 1000, H = 1383;
+
+  /* Дни: номер, центр отметки в % от карты (из Figma), название домика, вид отметки. Ссылок здесь нет. */
+  var DAYS = [
+    [1, 87.12, 59.57, 'Фотостудия', 'dec'], [2, 57.58, 30.25, 'Карусель', 'star'],
+    [3, 68.62, 74.0, 'Снежный шар', 'card'], [4, 43.42, 63.14, 'Банка краски', 'dec'],
+    [5, 10.14, 48.12, 'Олень', 'dec'], [6, 8.26, 34.68, 'Библиотека', 'dec'],
+    [7, 92.73, 20.91, 'Канатная дорога', 'card'], [8, 44.3, 25.43, 'Стеклянный купол', 'card'],
+    [9, 88.84, 80.24, 'Конёк', 'dec'], [10, 78.41, 11.8, 'Кинотеатр', 'star'],
+    [11, 45.97, 7.87, 'Оранжерея', 'dec'], [12, 91.38, 34.39, 'Пряничный домик', 'card'],
+    [13, 26.64, 52.77, 'Почта', 'star'], [14, 67.84, 90.95, 'Каток', 'star'],
+    [15, 92.69, 44.92, 'Амбар', 'dec'], [16, 18.15, 25.32, 'Школа', 'star'],
+    [17, 7.27, 4.97, 'Обсерватория', 'dec'], [18, 46.91, 80.95, 'Снежный домик', 'dec'],
+    [19, 70.39, 37.48, 'Кофейня', 'star'], [20, 59.09, 14.97, 'Музей', 'card'],
+    [21, 58.47, 40.97, 'Павильон', 'dec'], [22, 16.9, 86.99, 'Вокзал', 'card'],
+    [23, 40.7, 40.3, 'Банк', 'card'], [24, 75.61, 20.26, 'Мастерская', 'dec'],
+    [25, 23.67, 15.15, 'Галерея', 'card'], [26, 51.07, 68.77, 'Камин', 'star'],
+    [27, 25.34, 61.16, 'Типография', 'card'], [28, 93.73, 7.31, 'Маяк', 'dec'],
+    [29, 28.21, 23.38, 'Радиобашня', 'dec'], [30, 82.64, 69.96, 'Подарок', 'dec'],
+    [31, 48.52, 54.5, 'Ёлка', 'card']
+  ];
+  var MONTHS = 'декабря';
+
+  /* Какой сегодня день по Москве (UTC+3). Для проверки: ?advday=5 */
+  function mskToday() {
+    var q = window.location.search.match(/[?&]advday=(\d+)/);
+    if (q) { return parseInt(q[1], 10); }
+    var d = new Date(Date.now() + 3 * 3600 * 1000);
+    var y = d.getUTCFullYear(), m = d.getUTCMonth(), day = d.getUTCDate();
+    if (y > 2026 || (y === 2026 && m === 11 && day > 31)) { return 32; }
+    if (y === 2026 && m === 11) { return day; }
+    return 0;
+  }
+  var today = mskToday();
+
+  /* Отметки: каждая — одна картинка из Figma (вид: dec — «Декабря», star — цветок, card — карточка) */
+  var IMGD = 'https://dashkoy1.github.io/advent-calendar/assets/days/day-';
+  var K = W / 1920;
+  var KIND = {
+    dec: { bw: 133, bh: 124, iw: 220.94, ih: 211.81 },
+    star: { bw: 123, bh: 123, iw: 123, ih: 123 },
+    card: { bw: 129, bh: 129, iw: 129, ih: 129 }
+  };
+  var pins = [];
+  DAYS.forEach(function (it) {
+    var kd = KIND[it[4]] || KIND.card;
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'adv-pin';
+    var bw = kd.bw * K, bh = kd.bh * K;
+    b.style.left = it[1] + '%';
+    b.style.top = it[2] + '%';
+    b.style.width = bw.toFixed(1) + 'px';
+    b.style.height = bh.toFixed(1) + 'px';
+    b.style.marginLeft = (-bw / 2).toFixed(1) + 'px';
+    b.style.marginTop = (-bh / 2).toFixed(1) + 'px';
+    var state = it[0] > today ? 'locked' : (it[0] === today ? 'today' : 'open');
+    b.classList.add('is-' + state);
+    b.setAttribute('aria-label', 'День ' + it[0] + (state === 'locked' ? ', откроется ' + it[0] + ' ' + MONTHS : ''));
+    var inner = document.createElement('span');
+    inner.className = 'adv-pin__in';
+    var im = document.createElement('img');
+    im.className = 'adv-pin__img';
+    im.alt = '';
+    im.decoding = 'async';
+    im.loading = 'lazy';
+    im.width = Math.round(kd.iw * K);
+    im.style.width = (kd.iw * K).toFixed(1) + 'px';
+    im.style.height = (kd.ih * K).toFixed(1) + 'px';
+    im.src = IMGD + (it[0] > 9 ? '' : '0') + it[0] + '.webp';
+    inner.appendChild(im);
+    b.appendChild(inner);
+    b.addEventListener('click', function (e) {
+      e.stopPropagation();
+      if (moved) { return; }
+      onPin(it, state);
+    });
+    world.appendChild(b);
+    pins.push(b);
+  });
+
+  /* Камера: x, y — сдвиг, k — масштаб */
+  var x = 0, y = 0, k = 1, minK = 1, maxK = 4;
+  var vw = 0, vh = 0;
+  var isTouch = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+
+  function measure() {
+    vw = root.clientWidth; vh = root.clientHeight;
+    var fitK = Math.max(vw / W, vh / H);
+    var wasMin = Math.abs(k - minK) * 1000 > 1 ? false : true;
+    minK = fitK;
+    maxK = minK * (isTouch ? 3.2 : 4.4);
+    if (wasMin || minK > k) { k = minK; }
+    clamp();
+    render();
+    if (snowCanvas && vw) { snowSize(); }
+  }
+  function clamp() {
+    if (k > maxK) { k = maxK; }
+    if (minK > k) { k = minK; }
+    var mw = W * k, mh = H * k;
+    if (x > 0) { x = 0; }
+    if (vw - mw > x) { x = vw - mw; }
+    if (y > 0) { y = 0; }
+    if (vh - mh > y) { y = vh - mh; }
+    if (vw > mw) { x = (vw - mw) / 2; }
+    if (vh > mh) { y = (vh - mh) / 2; }
+  }
+  var raf = 0;
+  function render() {
+    if (raf) { return; }
+    raf = requestAnimationFrame(function () {
+      raf = 0;
+      world.style.transform = 'translate3d(' + x.toFixed(2) + 'px,' + y.toFixed(2) + 'px,0) scale(' + k.toFixed(4) + ')';
+      var ps = 1;
+      if (640 > vw) { ps = Math.min(1, 0.62 + 0.38 * (k / minK - 1)); }
+      world.style.setProperty('--inv', (ps / k).toFixed(4));
+      root.classList.toggle('is-zoomed', k - minK > minK * 0.02 || root.classList.contains('is-full'));
+      upgrade();
+    });
+  }
+
+  /* Подгрузка более чёткой картинки при приближении */
+  var level = 's';
+  function upgrade() {
+    var need = k * (window.devicePixelRatio || 1) * W;
+    var want = level;
+    if (need > 1300 && level === 's') { want = 'm'; }
+    if (need > 2700 && !isTouch && level !== 'l') { want = 'l'; }
+    if (want === level) { return; }
+    level = want;
+    if (want === 'l' && gl && gl.max && 6087 > gl.max) { level = 'm'; return; }
+    var pre = new Image();
+    pre.crossOrigin = 'anonymous';
+    pre.decoding = 'async';
+    pre.onload = function () { img.src = pre.src; if (gl) { gl.setImage(pre); } };
+    pre.src = IMG + want + '.webp';
+  }
+
+
+  /* ===== Объём: параллакс по карте глубины, мерцание окон, снег ===== */
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var glCanvas = root.querySelector('.adv-map__gl');
+  var snowCanvas = root.querySelector('.adv-map__snow');
+  var gl = null;
+  var tilt = { x: 0, y: 0, tx: 0, ty: 0 }, mouseIn = false, t0 = performance.now();
+  var depthData = null;
+
+  function initGL() {
+    if (reduceMotion) { return null; }
+    var c = glCanvas.getContext('webgl2', { alpha: false, antialias: false, premultipliedAlpha: false });
+    var v2 = !!c;
+    if (!c) { c = glCanvas.getContext('webgl', { alpha: false, antialias: false }); }
+    if (!c) { return null; }
+    var vs = 'attribute vec2 p;varying vec2 v;void main(){v=p*0.5+0.5;gl_Position=vec4(p,0.0,1.0);}';
+    var fs = [
+      'precision highp float;',
+      'uniform sampler2D img;uniform sampler2D dep;uniform vec2 res;uniform vec3 cam;uniform vec2 off;uniform float t;uniform float dpr;',
+      'varying vec2 v;',
+      'void main(){',
+      ' vec2 sp=vec2(v.x,1.0-v.y)*res/dpr;',
+      ' vec2 uv=(sp-cam.xy)/(cam.z*vec2(1000.0,1383.0));',
+      ' float d1=texture2D(dep,uv).r;',
+      ' vec2 u1=uv+off*(d1-0.5);',
+      ' float d2=texture2D(dep,u1).r;',
+      ' vec2 u2=uv+off*(d2-0.5);',
+      ' vec4 c=texture2D(img,u2);',
+      ' float l=dot(c.rgb,vec3(0.299,0.587,0.114));',
+      ' float warm=clamp((c.r-c.b)*2.5,0.0,1.0);',
+      ' float b=smoothstep(0.6,0.92,l)*warm;',
+      ' vec2 cell=floor(u2*vec2(240.0,330.0));',
+      ' float h=fract(sin(dot(cell,vec2(12.9898,78.233)))*43758.5453);',
+      ' float fl=sin(t*(1.1+h*2.4)+h*6.2832)*0.5+0.5;',
+      ' c.rgb+=c.rgb*b*(fl*0.24-0.07);',
+      ' gl_FragColor=vec4(c.rgb,1.0);',
+      '}'
+    ].join('\n');
+    function sh(type, src) { var o = c.createShader(type); c.shaderSource(o, src); c.compileShader(o); return c.getShaderParameter(o, c.COMPILE_STATUS) ? o : null; }
+    var a = sh(c.VERTEX_SHADER, vs), b = sh(c.FRAGMENT_SHADER, fs);
+    if (!a || !b) { return null; }
+    var pr = c.createProgram(); c.attachShader(pr, a); c.attachShader(pr, b); c.linkProgram(pr);
+    if (!c.getProgramParameter(pr, c.LINK_STATUS)) { return null; }
+    c.useProgram(pr);
+    var buf = c.createBuffer(); c.bindBuffer(c.ARRAY_BUFFER, buf);
+    c.bufferData(c.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), c.STATIC_DRAW);
+    var loc = c.getAttribLocation(pr, 'p'); c.enableVertexAttribArray(loc); c.vertexAttribPointer(loc, 2, c.FLOAT, false, 0, 0);
+    var U = {};
+    ['img', 'dep', 'res', 'cam', 'off', 't', 'dpr'].forEach(function (n) { U[n] = c.getUniformLocation(pr, n); });
+    c.uniform1i(U.img, 0); c.uniform1i(U.dep, 1);
+    function tex(unit) {
+      var tx = c.createTexture(); c.activeTexture(c.TEXTURE0 + unit); c.bindTexture(c.TEXTURE_2D, tx);
+      c.texParameteri(c.TEXTURE_2D, c.TEXTURE_WRAP_S, c.CLAMP_TO_EDGE);
+      c.texParameteri(c.TEXTURE_2D, c.TEXTURE_WRAP_T, c.CLAMP_TO_EDGE);
+      c.texParameteri(c.TEXTURE_2D, c.TEXTURE_MIN_FILTER, c.LINEAR);
+      c.texParameteri(c.TEXTURE_2D, c.TEXTURE_MAG_FILTER, c.LINEAR);
+      return tx;
+    }
+    var tImg = tex(0), tDep = tex(1);
+    var ready = { img: false, dep: false };
+    var g = {
+      c: c, max: c.getParameter(c.MAX_TEXTURE_SIZE),
+      setImage: function (im) {
+        try {
+          c.activeTexture(c.TEXTURE0); c.bindTexture(c.TEXTURE_2D, tImg);
+          c.texImage2D(c.TEXTURE_2D, 0, c.RGBA, c.RGBA, c.UNSIGNED_BYTE, im);
+          if (v2) { c.generateMipmap(c.TEXTURE_2D); c.texParameteri(c.TEXTURE_2D, c.TEXTURE_MIN_FILTER, c.LINEAR_MIPMAP_LINEAR); }
+          ready.img = true; check();
+        } catch (e) { fail(); }
+      },
+      setDepth: function (im) {
+        try {
+          c.activeTexture(c.TEXTURE1); c.bindTexture(c.TEXTURE_2D, tDep);
+          c.texImage2D(c.TEXTURE_2D, 0, c.RGBA, c.RGBA, c.UNSIGNED_BYTE, im);
+          ready.dep = true; check();
+        } catch (e) { fail(); }
+      },
+      draw: function (time) {
+        if (!(ready.img && ready.dep)) { return; }
+        var dpr = Math.min(window.devicePixelRatio || 1, vw * vh > 1500000 ? 1.5 : 2);
+        var cw = Math.round(vw * dpr), ch = Math.round(vh * dpr);
+        if (glCanvas.width !== cw || glCanvas.height !== ch) { glCanvas.width = cw; glCanvas.height = ch; }
+        c.viewport(0, 0, cw, ch);
+        var s = 0.028 * Math.sqrt(minK / k);
+        c.uniform2f(U.res, cw, ch);
+        c.uniform3f(U.cam, x, y, k);
+        c.uniform2f(U.off, tilt.x * s, tilt.y * s * 0.72);
+        c.uniform1f(U.t, time);
+        c.uniform1f(U.dpr, dpr);
+        c.drawArrays(c.TRIANGLE_STRIP, 0, 4);
+      }
+    };
+    function check() { if (ready.img && ready.dep) { root.classList.add('is-gl'); } }
+    function fail() { root.classList.remove('is-gl'); gl = null; }
+    return g;
+  }
+
+  /* Сдвиг отметок вместе с их домиком */
+  function depthAt(px, py) {
+    if (!depthData) { return 0.5; }
+    var ix = Math.min(depthData.w - 1, Math.max(0, Math.round(px / 100 * depthData.w)));
+    var iy = Math.min(depthData.h - 1, Math.max(0, Math.round(py / 100 * depthData.h)));
+    return depthData.d[(iy * depthData.w + ix) * 4] / 255;
+  }
+  function movePins() {
+    var s = 0.028 * Math.sqrt(minK / k);
+    var ox = tilt.x * s, oy = tilt.y * s * 0.72;
+    pins.forEach(function (b, i) {
+      var dd = (b._d === undefined) ? 0.5 : b._d;
+      var dx = -ox * (dd - 0.5) * W, dy = -oy * (dd - 0.5) * H;
+      b.style.transform = 'translate(' + dx.toFixed(2) + 'px,' + dy.toFixed(2) + 'px)';
+    });
+  }
+
+  /* Снег */
+  var flakes = [], sctx = snowCanvas.getContext('2d');
+  function snowSize() {
+    var dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    snowCanvas.width = Math.round(vw * dpr); snowCanvas.height = Math.round(vh * dpr);
+    sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    var n = Math.min(140, Math.round(vw * Math.min(vh, 1000) / 9000));
+    flakes = [];
+    for (var i = 0; n > i; i++) {
+      var z = Math.random();
+      flakes.push({ x: Math.random() * vw, y: Math.random() * vh, r: 0.6 + z * 2.2, sp: 0.25 + z * 0.9, dr: Math.random() * 6.28, o: 0.35 + z * 0.55, z: z });
+    }
+  }
+  function snow(dt) {
+    sctx.clearRect(0, 0, vw, vh);
+    sctx.fillStyle = '#ffffff';
+    for (var i = 0; flakes.length > i; i++) {
+      var f = flakes[i];
+      f.y += f.sp * dt * 0.06; f.dr += dt * 0.0012;
+      var fx = f.x + Math.sin(f.dr) * 8 * f.z + tilt.x * 14 * f.z;
+      if (f.y > vh + 4) { f.y = -4; f.x = Math.random() * vw; }
+      sctx.globalAlpha = f.o;
+      sctx.beginPath(); sctx.arc(fx, f.y, f.r, 0, 6.2832); sctx.fill();
+    }
+    sctx.globalAlpha = 1;
+  }
+
+  /* Наклон: за мышкой на ПК, плавное покачивание на телефоне и в покое */
+  root.addEventListener('mousemove', function (e) {
+    var r = root.getBoundingClientRect();
+    var wh = window.innerHeight || vh;
+    var top = Math.max(r.top, 0), bot = Math.min(r.bottom, wh);
+    tilt.tx = ((e.clientX - r.left) / r.width - 0.5) * 2;
+    tilt.ty = bot > top ? ((e.clientY - top) / (bot - top) - 0.5) * 2 : 0;
+    mouseIn = true;
+  });
+  root.addEventListener('mouseleave', function () { mouseIn = false; });
+
+  var visible = true, loopId = 0, lastT = performance.now();
+  function loop(now) {
+    loopId = 0;
+    if (!visible || document.hidden) { return; }
+    var time = (now - t0) / 1000, dt = Math.min(50, now - lastT); lastT = now;
+    if (!mouseIn) { tilt.tx = Math.sin(time * 0.35) * 0.55; tilt.ty = Math.cos(time * 0.27) * 0.4; }
+    tilt.x += (tilt.tx - tilt.x) * 0.06; tilt.y += (tilt.ty - tilt.y) * 0.06;
+    if (gl) { gl.draw(time); movePins(); }
+    snow(dt);
+    loopId = requestAnimationFrame(loop);
+  }
+  function startLoop() { if (!loopId && !reduceMotion) { lastT = performance.now(); loopId = requestAnimationFrame(loop); } }
+
+  gl = initGL();
+  if (gl) {
+    var dimg = new Image();
+    dimg.crossOrigin = 'anonymous';
+    dimg.onload = function () {
+      gl && gl.setDepth(dimg);
+      try {
+        var cv = document.createElement('canvas'); cv.width = dimg.naturalWidth; cv.height = dimg.naturalHeight;
+        var cx2 = cv.getContext('2d'); cx2.drawImage(dimg, 0, 0);
+        depthData = { w: cv.width, h: cv.height, d: cx2.getImageData(0, 0, cv.width, cv.height).data };
+        pins.forEach(function (b, i) { b._d = depthAt(DAYS[i][1], DAYS[i][2]); });
+      } catch (e) { depthData = null; }
+    };
+    dimg.src = IMG + 'depth.webp';
+    if (img.complete && img.naturalWidth) { gl.setImage(img); } else { img.addEventListener('load', function () { gl && gl.setImage(img); }); }
+  }
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(function (en) { visible = en[0].isIntersecting; if (visible) { startLoop(); } }, { rootMargin: '100px' }).observe(root);
+  }
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) { startLoop(); } });
+
+  /* Масштаб вокруг точки экрана */
+  function zoomAt(nk, px, py) {
+    if (nk > maxK) { nk = maxK; }
+    if (minK > nk) { nk = minK; }
+    var wx = (px - x) / k, wy = (py - y) / k;
+    k = nk;
+    x = px - wx * k; y = py - wy * k;
+    clamp(); render();
+  }
+
+  /* Центр видимой на экране части карты (блок может быть выше окна) */
+  function visCenter() {
+    var r = root.getBoundingClientRect();
+    var wh = window.innerHeight || vh;
+    var top = Math.max(0, -r.top), bottom = Math.min(vh, wh - r.top);
+    if (top > bottom - 40) { top = 0; bottom = vh; }
+    return { x: vw / 2, y: (top + bottom) / 2 };
+  }
+
+  /* Плавный перелёт камеры */
+  var anim = 0;
+  function flyTo(tk, cx, cy, ms, done) {
+    cancelAnimationFrame(anim);
+    var sk = k, sx = x, sy = y;
+    if (tk > maxK) { tk = maxK; }
+    if (minK > tk) { tk = minK; }
+    var vc = visCenter();
+    var ex = vc.x - cx * tk, ey = vc.y - cy * tk;
+    var save = { x: x, y: y, k: k };
+    x = ex; y = ey; k = tk; clamp(); ex = x; ey = y;
+    x = save.x; y = save.y; k = save.k;
+    var t0 = performance.now();
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) { ms = 1; }
+    function step(t) {
+      var p = Math.min(1, (t - t0) / ms);
+      var e = p * p * (3 - 2 * p);
+      k = sk + (tk - sk) * e; x = sx + (ex - sx) * e; y = sy + (ey - sy) * e;
+      render();
+      if (1 > p) { anim = requestAnimationFrame(step); } else if (done) { done(); }
+    }
+    anim = requestAnimationFrame(step);
+  }
+
+  /* Перетаскивание и щипок */
+  var pts = {}, moved = false, last = null, vel = { x: 0, y: 0 }, pinch = null, inertia = 0;
+  function count() { return Object.keys(pts).length; }
+  root.addEventListener('pointerdown', function (e) {
+    if (e.target.closest('.adv-map__ui')) { return; }
+    cancelAnimationFrame(inertia); cancelAnimationFrame(anim);
+    pts[e.pointerId] = { x: e.clientX, y: e.clientY };
+    moved = false;
+    last = { x: e.clientX, y: e.clientY, t: performance.now() };
+    vel = { x: 0, y: 0 };
+    if (count() === 2) { startPinch(); }
+  });
+  function startPinch() {
+    var p = Object.keys(pts).map(function (id) { return pts[id]; });
+    var r = root.getBoundingClientRect();
+    pinch = {
+      d: Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y),
+      k: k,
+      cx: (p[0].x + p[1].x) / 2 - r.left, cy: (p[0].y + p[1].y) / 2 - r.top,
+      x: x, y: y
+    };
+  }
+  root.addEventListener('pointermove', function (e) {
+    if (!pts[e.pointerId]) { return; }
+    var prev = pts[e.pointerId];
+    pts[e.pointerId] = { x: e.clientX, y: e.clientY };
+    var r = root.getBoundingClientRect();
+    if (count() === 2 && pinch) {
+      var p = Object.keys(pts).map(function (id) { return pts[id]; });
+      var d = Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y);
+      var cx = (p[0].x + p[1].x) / 2 - r.left, cy = (p[0].y + p[1].y) / 2 - r.top;
+      var nk = pinch.k * d / pinch.d;
+      if (nk > maxK) { nk = maxK; }
+      if (minK > nk) { nk = minK; }
+      var wx = (pinch.cx - pinch.x) / pinch.k, wy = (pinch.cy - pinch.y) / pinch.k;
+      k = nk; x = cx - wx * k; y = cy - wy * k;
+      moved = true; clamp(); render();
+      return;
+    }
+    if (count() !== 1) { return; }
+    if (!root.classList.contains('is-zoomed')) { return; }
+    var dx = e.clientX - prev.x, dy = e.clientY - prev.y;
+    if (Math.abs(dx) + Math.abs(dy) > 2) { moved = true; root.classList.add('is-dragging'); }
+    x += dx; y += dy; clamp(); render();
+    var now = performance.now(), dt = now - last.t;
+    if (dt > 0) { vel = { x: (e.clientX - last.x) / dt, y: (e.clientY - last.y) / dt }; }
+    last = { x: e.clientX, y: e.clientY, t: now };
+  });
+  function up(e) {
+    if (!pts[e.pointerId]) { return; }
+    delete pts[e.pointerId];
+    root.classList.remove('is-dragging');
+    if (count() === 1) { pinch = null; var id = Object.keys(pts)[0]; last = { x: pts[id].x, y: pts[id].y, t: performance.now() }; return; }
+    if (count() === 0) {
+      pinch = null;
+      if (moved && performance.now() - last.t > 80) { vel = { x: 0, y: 0 }; }
+      glide();
+      setTimeout(function () { moved = false; }, 30);
+    }
+  }
+  root.addEventListener('pointerup', up);
+  root.addEventListener('pointercancel', up);
+  root.addEventListener('pointerleave', function (e) { if (e.pointerType === 'mouse') { up(e); } });
+
+  function glide() {
+    var vx = vel.x * 16, vy = vel.y * 16;
+    function step() {
+      vx *= 0.92; vy *= 0.92;
+      if (0.3 > Math.abs(vx) + Math.abs(vy)) { return; }
+      x += vx; y += vy; clamp(); render();
+      inertia = requestAnimationFrame(step);
+    }
+    inertia = requestAnimationFrame(step);
+  }
+
+  /* Колесо: зум только с Ctrl/Cmd (и щипок на тачпаде) или в полноэкранном режиме */
+  root.addEventListener('wheel', function (e) {
+    var full = root.classList.contains('is-full');
+    if (!e.ctrlKey && !e.metaKey && !full) {
+      if (!wheelHinted && root.classList.contains('is-zoomed')) { wheelHinted = true; showHint('Колесо с Ctrl — приблизить, мышкой — двигать'); }
+      return;
+    }
+    e.preventDefault();
+    var r = root.getBoundingClientRect();
+    zoomAt(k * Math.exp(-e.deltaY * (e.ctrlKey ? 0.012 : 0.0022)), e.clientX - r.left, e.clientY - r.top);
+  }, { passive: false });
+
+  /* Двойной клик / двойной тап — приблизить */
+  var wheelHinted = false;
+  root.addEventListener('dblclick', function (e) {
+    if (e.target.closest('.adv-pin, .adv-map__ui')) { return; }
+    var r = root.getBoundingClientRect();
+    var px = e.clientX - r.left, py = e.clientY - r.top;
+    var tk = k * 2 > maxK ? minK : k * 2;
+    flyTo(tk, (px - x) / k, (py - y) / k, 450);
+  });
+
+  /* Кнопки */
+  root.querySelector('.adv-map__ui').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-act]');
+    if (!b) { return; }
+    var act = b.getAttribute('data-act');
+    var vc = visCenter();
+    var cx = (vc.x - x) / k, cy = (vc.y - y) / k;
+    if (act === 'in') { flyTo(k * 1.6, cx, cy, 350); }
+    if (act === 'out') { flyTo(k / 1.6, cx, cy, 350); }
+    if (act === 'reset') { flyTo(minK, W / 2, H / 2, 500); }
+    if (act === 'full') { toggleFull(); }
+  });
+
+  /* Полноэкранный режим (переносим карту в body, чтобы ничего не обрезало) */
+  var home = root.parentNode, homeNext = root.nextSibling;
+  function toggleFull() {
+    var on = !root.classList.contains('is-full');
+    if (on) {
+      document.body.appendChild(root);
+      root.classList.add('is-full');
+      document.documentElement.style.overflow = 'hidden';
+    } else {
+      root.classList.remove('is-full');
+      home.insertBefore(root, homeNext);
+      document.documentElement.style.overflow = '';
+    }
+    var fb = root.querySelector('[data-act="full"]');
+    fb.setAttribute('aria-label', on ? 'Свернуть карту' : 'Развернуть карту');
+    k = 0; measure(); edges();
+    if (on) { showHint(isTouch ? 'Двигай пальцем, разводи двумя — приближай' : 'Тяни мышкой, колесо — приблизить'); }
+  }
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && root.classList.contains('is-full')) { toggleFull(); }
+  });
+
+  /* Подсказки */
+  var hintT = 0, toastT = 0;
+  function showHint(t) {
+    hint.textContent = t; hint.classList.add('is-on');
+    clearTimeout(hintT); hintT = setTimeout(function () { hint.classList.remove('is-on'); }, 2200);
+  }
+  function showToast(t) {
+    toast.textContent = t; toast.classList.add('is-on');
+    clearTimeout(toastT); toastT = setTimeout(function () { toast.classList.remove('is-on'); }, 2600);
+  }
+
+  /* Нажатие на день */
+  function onPin(it, state) {
+    var cx = it[1] / 100 * W, cy = it[2] / 100 * H;
+    if (state === 'locked') {
+      flyTo(Math.max(k, minK * 1.8), cx, cy, 600);
+      showToast('День ' + it[0] + ' откроется ' + it[0] + ' ' + MONTHS + ' в 00:00 по Москве');
+      return;
+    }
+    flyTo(Math.max(k, minK * 2.4), cx, cy, 800, function () { openDay(it[0]); });
+  }
+  function openDay(n) {
+    if (typeof window.advOpenDay === 'function') { window.advOpenDay(n); return; }
+    showToast('День ' + n + ': здесь откроется поп-ап с подарком');
+  }
+
+  /* Кнопка «Открыть подарок дня» с главного экрана (#advent-map) */
+  function goToday() {
+    var d = today;
+    if (1 > d) { flyTo(minK, W / 2, H / 2, 500); showToast('Календарь откроется 1 декабря в 00:00 по Москве'); return; }
+    if (d > 31) { d = 31; }
+    var it = DAYS[d - 1];
+    onPin(it, 'today');
+  }
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('a[href="#advent-map"], a[href$="#advent-map"]');
+    if (!a) { return; }
+    e.preventDefault();
+    var r = root.getBoundingClientRect();
+    window.scrollTo({ top: window.pageYOffset + r.top - 20, behavior: 'smooth' });
+    e.stopPropagation();
+    setTimeout(goToday, 700);
+  }, true);
+
+  /* Кнопки и подсказки держим у видимого края, если блок выше окна */
+  var edgeRaf = 0;
+  function edges() {
+    if (edgeRaf) { return; }
+    edgeRaf = requestAnimationFrame(function () {
+      edgeRaf = 0;
+      if (root.classList.contains('is-full')) { root.style.setProperty('--vt', '0px'); root.style.setProperty('--vb', '0px'); return; }
+      var r = root.getBoundingClientRect();
+      var wh = window.innerHeight || vh;
+      var vt = Math.max(0, Math.min(vh - 120, -r.top));
+      var vb = Math.max(0, Math.min(vh - 120, r.bottom - wh));
+      root.style.setProperty('--vt', vt.toFixed(0) + 'px');
+      root.style.setProperty('--vb', vb.toFixed(0) + 'px');
+    });
+  }
+  window.addEventListener('scroll', edges, { passive: true });
+  window.addEventListener('resize', edges);
+
+  /* Старт */
+  measure();
+  edges();
+  startLoop();
+  window.addEventListener('resize', measure);
+  if ('ResizeObserver' in window) { new ResizeObserver(measure).observe(root); }
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (en) {
+      if (en[0].isIntersecting) { showHint(isTouch ? 'Разведи двумя пальцами, чтобы приблизить, или разверни карту' : 'Нажми «+» или дважды кликни, чтобы приблизить'); io.disconnect(); }
+    }, { threshold: 0.4 });
+    io.observe(root);
+  }
+})();
+</script>
