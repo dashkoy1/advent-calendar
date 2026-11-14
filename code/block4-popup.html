@@ -1,11 +1,61 @@
 <style>
-  /* Zero Block: HTML-элемент на всю ширину, без масштабирования Тильды; старые элементы блока скрыты */
-  .t396__elem:has(#adv-pop), .t396__elem:has(#adv-pop) .tn-atom {
-    left: 0 !important; top: 0 !important; width: 100% !important; height: auto !important; zoom: 1 !important;
+  /* Zero Block: блок на странице не виден — поп-ап открывается поверх страницы; старые элементы блока скрыты */
+  .t396__elem:has(#adv-pop-anchor), .t396__elem:has(#adv-pop-anchor) .tn-atom {
+    left: 0 !important; top: 0 !important; width: 0 !important; height: 0 !important; zoom: 1 !important; overflow: visible !important;
   }
-  .t396__artboard:has(#adv-pop) .t396__elem:not(:has(#adv-pop)) { display: none !important; }
-  .t396 .t396__artboard:has(#adv-pop), .t396__artboard:has(#adv-pop) .t396__carrier, .t396__artboard:has(#adv-pop) .t396__filter {
-    height: var(--adv-h, 900px) !important; min-height: 0 !important;
+  .t396__artboard:has(#adv-pop-anchor) .t396__elem:not(:has(#adv-pop-anchor)) { display: none !important; }
+  .t396 .t396__artboard:has(#adv-pop-anchor), .t396__artboard:has(#adv-pop-anchor) .t396__carrier, .t396__artboard:has(#adv-pop-anchor) .t396__filter {
+    height: 0 !important; min-height: 0 !important;
+  }
+
+  /* ===== Окно поп-апа ===== */
+  .adv-pop-ov { position: fixed; inset: 0; z-index: 100001; display: none; }
+  .adv-pop-ov.is-open { display: block; }
+  .adv-pop-ov__bg {
+    position: absolute; inset: 0;
+    background: rgba(6, 12, 28, .62);
+    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+    opacity: 0; transition: opacity .35s ease;
+  }
+  .adv-pop-ov__scroll {
+    position: absolute; inset: 0; display: flex;
+    overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+  }
+  .adv-pop-ov__sheet {
+    width: 100%; margin: auto;
+    opacity: 0; transform: translateY(28px) scale(.985);
+    transition: opacity .4s ease, transform .5s cubic-bezier(.2, .8, .2, 1);
+  }
+  .adv-pop-ov.is-on .adv-pop-ov__bg { opacity: 1; }
+  .adv-pop-ov.is-on .adv-pop-ov__sheet { opacity: 1; transform: none; }
+  .adv-pop-ov .adv-pop { background: transparent; }
+  .adv-pop-ov .adv-pop__share { box-shadow: 0 0 0 1px rgba(246, 228, 216, .14); }
+  .adv-pop-ov .adv-pop__more--m { box-shadow: 0 0 0 1px rgba(246, 228, 216, .16), 0 20px 40px -20px rgba(0, 0, 0, .6); }
+  .adv-pop-ov__close {
+    position: fixed; top: 18px; right: 18px; z-index: 2;
+    width: 46px; height: 46px; border: 0; border-radius: 50%; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(15, 24, 45, .82); color: #fff;
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, .14), 0 10px 24px -10px rgba(0, 0, 0, .6);
+    opacity: 0; transition: opacity .35s ease, background .2s ease;
+  }
+  .adv-pop-ov.is-on .adv-pop-ov__close { opacity: 1; }
+  .adv-pop-ov__close:hover { background: rgba(15, 24, 45, .95); }
+  .adv-pop-ov__close svg { width: 20px; height: 20px; }
+  .adv-pop-ov__grip { display: none; }
+  @media (max-width: 1099px) {
+    .adv-pop-ov__sheet { margin: auto auto 0; padding-top: 56px; transform: translateY(100%); transition: opacity .3s ease, transform .45s cubic-bezier(.2, .8, .2, 1); }
+    .adv-pop-ov.is-drag .adv-pop-ov__sheet { transition: none; }
+    .adv-pop-ov__grip {
+      display: block; position: relative; margin: 0 auto 10px;
+      width: 44px; height: 5px; border-radius: 3px; background: rgba(255, 255, 255, .55);
+    }
+    .adv-pop-ov__close { top: 12px; right: 12px; width: 42px; height: 42px; }
+    .adv-pop-ov .adv-pop { padding-top: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .adv-pop-ov__sheet, .adv-pop-ov__bg { transition: none; }
   }
 
   /* ===== Блок 4. Поп-ап подарка дня ===== */
@@ -226,6 +276,13 @@
   .adv-share-toast.is-on { opacity: 1; transform: translate(-50%, 0); }
 </style>
 
+<div id="adv-pop-anchor" hidden></div>
+<div class="adv-pop-ov" id="adv-pop-ov" role="dialog" aria-modal="true" aria-label="Подарок дня" aria-hidden="true">
+  <div class="adv-pop-ov__bg"></div>
+  <button class="adv-pop-ov__close" type="button" aria-label="Закрыть"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  <div class="adv-pop-ov__scroll">
+  <div class="adv-pop-ov__sheet">
+  <div class="adv-pop-ov__grip"></div>
 <section class="adv-pop" id="adv-pop" aria-label="Подарок дня">
   <div class="adv-pop__wrap">
 
@@ -264,6 +321,9 @@
 
   </div>
 </section>
+  </div>
+  </div>
+</div>
 
 <script>
 (function () {
@@ -273,15 +333,70 @@
   /* Ссылка на подарок дня. Пока пусто — кнопка показывает подсказку. */
   var GIFT_URL = '';
 
-  /* Zero Block: высота артборда = высоте секции */
-  var ab = sec.closest('.t396__artboard');
-  if (ab) {
-    var fit = function () { ab.style.setProperty('--adv-h', Math.ceil(sec.getBoundingClientRect().height) + 'px'); };
-    fit();
-    if ('ResizeObserver' in window) { new ResizeObserver(fit).observe(sec); }
-    window.addEventListener('resize', fit);
-    window.addEventListener('load', fit);
+  /* Окно поп-апа: переносим в body, чтобы его не обрезал Zero Block */
+  var ov = document.getElementById('adv-pop-ov');
+  var scroller = ov.querySelector('.adv-pop-ov__scroll');
+  var sheet = ov.querySelector('.adv-pop-ov__sheet');
+  document.body.appendChild(ov);
+
+  /* Готовые поп-апы дней. Пока сверстан только день 2. */
+  var READY = { 2: true };
+  var closeT = 0, lastFocus = null;
+  function open(n) {
+    clearTimeout(closeT);
+    lastFocus = document.activeElement;
+    ov.classList.add('is-open');
+    ov.setAttribute('aria-hidden', 'false');
+    document.documentElement.style.overflow = 'hidden';
+    scroller.scrollTop = 0;
+    sheet.style.transform = '';
+    requestAnimationFrame(function () { requestAnimationFrame(function () { ov.classList.add('is-on'); }); });
+    setTimeout(function () { var c = ov.querySelector('.adv-pop-ov__close'); if (c) { c.focus({ preventScroll: true }); } }, 60);
   }
+  function close() {
+    ov.classList.remove('is-on');
+    ov.setAttribute('aria-hidden', 'true');
+    sheet.style.transform = '';
+    closeT = setTimeout(function () {
+      ov.classList.remove('is-open');
+      document.documentElement.style.overflow = '';
+      if (lastFocus && lastFocus.focus) { lastFocus.focus({ preventScroll: true }); }
+    }, 420);
+  }
+  window.advOpenDay = function (n) {
+    if (READY[n]) { open(n); return; }
+    showToast('Поп-ап дня ' + n + ' скоро появится 🎁');
+  };
+  ov.querySelector('.adv-pop-ov__close').addEventListener('click', close);
+  scroller.addEventListener('click', function (e) {
+    if (e.target.closest('.adv-pop__share, .adv-pop__card, .adv-pop__promo, .adv-pop__more--m')) { return; }
+    close();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && ov.classList.contains('is-on')) { close(); }
+  });
+
+  /* Телефон: закрыть свайпом вниз */
+  var sy = 0, dy = 0, drag = false;
+  scroller.addEventListener('touchstart', function (e) {
+    if (scroller.scrollTop > 0 || window.innerWidth > 1099) { drag = false; return; }
+    drag = true; dy = 0; sy = e.touches[0].clientY;
+  }, { passive: true });
+  scroller.addEventListener('touchmove', function (e) {
+    if (!drag) { return; }
+    dy = e.touches[0].clientY - sy;
+    if (0 >= dy) { dy = 0; sheet.style.transform = ''; ov.classList.remove('is-drag'); return; }
+    if (scroller.scrollTop > 0) { drag = false; return; }
+    ov.classList.add('is-drag');
+    sheet.style.transform = 'translateY(' + dy + 'px)';
+    if (e.cancelable) { e.preventDefault(); }
+  }, { passive: false });
+  scroller.addEventListener('touchend', function () {
+    if (!drag) { return; }
+    drag = false;
+    ov.classList.remove('is-drag');
+    if (dy > 110) { close(); } else { sheet.style.transform = ''; }
+  });
 
   var toast = null, toastT = 0;
   function showToast(t) {
