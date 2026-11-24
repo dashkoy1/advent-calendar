@@ -1,10 +1,10 @@
 <style>
   /* Zero Block: блок на странице не виден — поп-ап открывается поверх страницы; старые элементы блока скрыты */
-  .t396__elem:has(#adv-pop-anchor), .t396__elem:has(#adv-pop-anchor) .tn-atom {
+  .t396__elem:has(.adv-pop-anchor), .t396__elem:has(.adv-pop-anchor) .tn-atom {
     left: 0 !important; top: 0 !important; width: 0 !important; height: 0 !important; zoom: 1 !important; overflow: visible !important;
   }
-  .t396__artboard:has(#adv-pop-anchor) .t396__elem:not(:has(#adv-pop-anchor)) { display: none !important; }
-  .t396 .t396__artboard:has(#adv-pop-anchor), .t396__artboard:has(#adv-pop-anchor) .t396__carrier, .t396__artboard:has(#adv-pop-anchor) .t396__filter {
+  .t396__artboard:has(.adv-pop-anchor) .t396__elem:not(:has(.adv-pop-anchor)) { display: none !important; }
+  .t396 .t396__artboard:has(.adv-pop-anchor), .t396__artboard:has(.adv-pop-anchor) .t396__carrier, .t396__artboard:has(.adv-pop-anchor) .t396__filter {
     height: 0 !important; min-height: 0 !important;
   }
 
@@ -316,14 +316,23 @@
   .adv-share-toast.is-on { opacity: 1; transform: translate(-50%, 0); }
 </style>
 
-<div id="adv-pop-anchor" hidden></div>
-<div class="adv-pop-ov" id="adv-pop-ov" role="dialog" aria-modal="true" aria-label="Подарок дня" aria-hidden="true">
+<!-- =========================================================
+     ПОП-АП ДНЯ 2. Что можно менять:
+     • data-day="2" — номер дня (у каждой копии свой);
+     • дата и тег — в двух <span class="adv-pop__tag">;
+     • заголовок и описание — в <h3> и <p>, перенос строки — <br>;
+     • фото: телефон — в <source srcset="…">, ПК — в <img src="…">;
+     • ссылка на подарок — в href у кнопки «Открыть подарок дня» (пока "#" — кнопка пишет «скоро»).
+     Остальное (оформление, таймер, закрытие) — в основном блоке поп-апа, здесь не трогаем.
+     ========================================================= -->
+<div class="adv-pop-anchor" hidden></div>
+<div class="adv-pop-ov" data-day="2" role="dialog" aria-modal="true" aria-label="Подарок дня 2" aria-hidden="true">
   <div class="adv-pop-ov__bg"></div>
   <button class="adv-pop-ov__close" type="button" aria-label="Закрыть"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
   <div class="adv-pop-ov__scroll">
   <div class="adv-pop-ov__sheet">
   <div class="adv-pop-ov__grip"></div>
-<section class="adv-pop" id="adv-pop" aria-label="Подарок дня">
+<section class="adv-pop" aria-label="Подарок дня 2">
   <div class="adv-pop__wrap">
 
     <div class="adv-pop__share">
@@ -335,7 +344,10 @@
     </div>
 
     <div class="adv-pop__card">
-      <img class="adv-pop__bg" src="https://dashkoy1.github.io/advent-calendar/assets/popup/day-02-oboi.webp" style="--mpos: 84% 50%" alt="" loading="lazy" decoding="async">
+      <picture>
+        <source media="(max-width: 1099px)" srcset="https://dashkoy1.github.io/advent-calendar/assets/popup/days/day-02-m.webp">
+        <img class="adv-pop__bg" src="https://dashkoy1.github.io/advent-calendar/assets/popup/days/day-02-d.webp" alt="" loading="lazy" decoding="async">
+      </picture>
       <div class="adv-pop__tags">
         <span class="adv-pop__tag adv-pop__tag--date"><img src="https://dashkoy1.github.io/advent-calendar/assets/popup/cal.svg" alt="" width="13" height="14">2 декабря</span>
         <span class="adv-pop__tag">#обои</span>
@@ -367,115 +379,13 @@
 
 <script>
 (function () {
-  var sec = document.getElementById('adv-pop');
-  if (!sec) { return; }
-
-  /* Ссылка на подарок дня. Пока пусто — кнопка показывает подсказку. */
-  var GIFT_URL = '';
-
-  /* Окно поп-апа: переносим в body, чтобы его не обрезал Zero Block */
-  var ov = document.getElementById('adv-pop-ov');
-  var scroller = ov.querySelector('.adv-pop-ov__scroll');
-  var sheet = ov.querySelector('.adv-pop-ov__sheet');
-  document.body.appendChild(ov);
-
-  /* Крестик: на ПК закреплён в углу экрана, на телефоне лежит внутри окна поверх верхней плашки */
-  var closeBtn = ov.querySelector('.adv-pop-ov__close');
+  /* Общий код поп-апов. Окно каждого дня — разметка .adv-pop-ov[data-day="N"]:
+     день 2 лежит в этом блоке, остальные дни — в блоках-копиях (только разметка).
+     Карта вызывает window.advOpenDay(N). */
+  if (window.advPopEngine) { return; }
+  window.advPopEngine = true;
   var mqMob = window.matchMedia('(max-width: 1099px)');
-  function placeClose() {
-    if (mqMob.matches) { sheet.insertBefore(closeBtn, sheet.firstChild); }
-    else { ov.insertBefore(closeBtn, ov.querySelector('.adv-pop-ov__scroll')); }
-  }
-  placeClose();
-  if (mqMob.addEventListener) { mqMob.addEventListener('change', placeClose); } else if (mqMob.addListener) { mqMob.addListener(placeClose); }
-
-  /* Готовые поп-апы дней. Пока сверстан только день 2. */
-  var READY = { 2: true };
-  var closeT = 0, lastFocus = null;
-
-  /* Таймер «Подарок исчезнет через…»: время и срок дня берём из кода карты (window.advTime) */
-  var card = sec.querySelector('.adv-pop__card');
-  var bar = document.createElement('div');
-  bar.className = 'adv-pop__timer';
-  bar.setAttribute('role', 'timer');
-  bar.innerHTML = '<i aria-hidden="true"></i><span>Подарок исчезнет через <b>--:--:--</b></span>';
-  var barTimer = 0, barDay = 0;
   function pad2(v) { return (v > 9 ? '' : '0') + v; }
-  function barTick() {
-    var T = window.advTime;
-    var ms = T.closeAt(barDay) - T.now();
-    if (0 >= ms) { bar.innerHTML = '<i aria-hidden="true"></i><span>Этот подарок растаял ❄️</span>'; clearInterval(barTimer); return; }
-    var s = Math.floor(ms / 1000);
-    bar.querySelector('b').textContent = pad2(Math.floor(s / 3600)) + ':' + pad2(Math.floor(s / 60) % 60) + ':' + pad2(s % 60);
-    bar.classList.toggle('is-hot', 3600000 > ms);
-  }
-  function startTimer(n) {
-    clearInterval(barTimer);
-    if (!window.advTime || !card) { return; }
-    barDay = n;
-    bar.innerHTML = '<i aria-hidden="true"></i><span>Подарок исчезнет через <b>--:--:--</b></span>';
-    card.insertBefore(bar, card.firstChild);
-    card.classList.add('has-timer');
-    barTick(); barTimer = setInterval(barTick, 1000);
-  }
-
-  function open(n) {
-    clearTimeout(closeT);
-    startTimer(n);
-    lastFocus = document.activeElement;
-    ov.classList.add('is-open');
-    ov.setAttribute('aria-hidden', 'false');
-    document.documentElement.style.overflow = 'hidden';
-    scroller.scrollTop = 0;
-    sheet.style.transform = '';
-    requestAnimationFrame(function () { requestAnimationFrame(function () { ov.classList.add('is-on'); }); });
-    setTimeout(function () { var c = ov.querySelector('.adv-pop-ov__close'); if (c) { c.focus({ preventScroll: true }); } }, 60);
-  }
-  function close() {
-    ov.classList.remove('is-on');
-    ov.setAttribute('aria-hidden', 'true');
-    sheet.style.transform = '';
-    clearInterval(barTimer);
-    closeT = setTimeout(function () {
-      ov.classList.remove('is-open');
-      document.documentElement.style.overflow = '';
-      if (lastFocus && lastFocus.focus) { lastFocus.focus({ preventScroll: true }); }
-    }, 420);
-  }
-  window.advOpenDay = function (n) {
-    if (READY[n]) { open(n); return; }
-    showToast('Поп-ап дня ' + n + ' скоро появится 🎁');
-  };
-  ov.querySelector('.adv-pop-ov__close').addEventListener('click', close);
-  scroller.addEventListener('click', function (e) {
-    if (e.target.closest('.adv-pop__share, .adv-pop__card, .adv-pop__promo, .adv-pop__more--m')) { return; }
-    close();
-  });
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && ov.classList.contains('is-on')) { close(); }
-  });
-
-  /* Телефон: закрыть свайпом вниз */
-  var sy = 0, dy = 0, drag = false;
-  scroller.addEventListener('touchstart', function (e) {
-    if (scroller.scrollTop > 0 || window.innerWidth > 1099) { drag = false; return; }
-    drag = true; dy = 0; sy = e.touches[0].clientY;
-  }, { passive: true });
-  scroller.addEventListener('touchmove', function (e) {
-    if (!drag) { return; }
-    dy = e.touches[0].clientY - sy;
-    if (0 >= dy) { dy = 0; sheet.style.transform = ''; ov.classList.remove('is-drag'); return; }
-    if (scroller.scrollTop > 0) { drag = false; return; }
-    ov.classList.add('is-drag');
-    sheet.style.transform = 'translateY(' + dy + 'px)';
-    if (e.cancelable) { e.preventDefault(); }
-  }, { passive: false });
-  scroller.addEventListener('touchend', function () {
-    if (!drag) { return; }
-    drag = false;
-    ov.classList.remove('is-drag');
-    if (dy > 110) { close(); } else { sheet.style.transform = ''; }
-  });
 
   var toast = null, toastT = 0;
   function showToast(t) {
@@ -492,19 +402,128 @@
     toastT = setTimeout(function () { toast.classList.remove('is-on'); }, 2600);
   }
 
-  var gift = sec.querySelector('[data-adv-gift]');
-  if (gift) {
-    if (GIFT_URL) {
-      gift.href = GIFT_URL;
-      gift.target = '_blank';
-      gift.rel = 'noopener';
-    } else {
-      gift.addEventListener('click', function (e) {
-        e.preventDefault();
-        showToast('Подарок откроется в свой день 🎁');
-      });
+  /* Подготовка окна одного дня (один раз) */
+  function setup(ov) {
+    if (ov._adv) { return ov._adv; }
+    var n = parseInt(ov.getAttribute('data-day'), 10);
+    var scroller = ov.querySelector('.adv-pop-ov__scroll');
+    var sheet = ov.querySelector('.adv-pop-ov__sheet');
+    var closeBtn = ov.querySelector('.adv-pop-ov__close');
+    var card = ov.querySelector('.adv-pop__card');
+    /* переносим в body, чтобы окно не обрезал Zero Block */
+    document.body.appendChild(ov);
+
+    /* крестик: на ПК в углу экрана, на телефоне внутри окна поверх верхней плашки */
+    function placeClose() {
+      if (mqMob.matches) { sheet.insertBefore(closeBtn, sheet.firstChild); }
+      else { ov.insertBefore(closeBtn, scroller); }
     }
+    placeClose();
+    if (mqMob.addEventListener) { mqMob.addEventListener('change', placeClose); } else if (mqMob.addListener) { mqMob.addListener(placeClose); }
+
+    /* таймер «Подарок исчезнет через…» (время — из кода карты, window.advTime) */
+    var bar = document.createElement('div');
+    bar.className = 'adv-pop__timer';
+    bar.setAttribute('role', 'timer');
+    var barTimer = 0;
+    function barTick() {
+      var T = window.advTime;
+      var ms = T.closeAt(n) - T.now();
+      if (0 >= ms) { bar.innerHTML = '<i aria-hidden="true"></i><span>Этот подарок растаял ❄️</span>'; clearInterval(barTimer); return; }
+      var s = Math.floor(ms / 1000);
+      bar.querySelector('b').textContent = pad2(Math.floor(s / 3600)) + ':' + pad2(Math.floor(s / 60) % 60) + ':' + pad2(s % 60);
+      bar.classList.toggle('is-hot', 3600000 > ms);
+    }
+    function startTimer() {
+      clearInterval(barTimer);
+      if (!window.advTime || !card) { return; }
+      bar.innerHTML = '<i aria-hidden="true"></i><span>Подарок исчезнет через <b>--:--:--</b></span>';
+      card.insertBefore(bar, card.firstChild);
+      card.classList.add('has-timer');
+      barTick(); barTimer = setInterval(barTick, 1000);
+    }
+
+    var closeT = 0, lastFocus = null;
+    function open() {
+      clearTimeout(closeT);
+      startTimer();
+      lastFocus = document.activeElement;
+      ov.classList.add('is-open');
+      ov.setAttribute('aria-hidden', 'false');
+      document.documentElement.style.overflow = 'hidden';
+      scroller.scrollTop = 0;
+      sheet.style.transform = '';
+      requestAnimationFrame(function () { requestAnimationFrame(function () { ov.classList.add('is-on'); }); });
+      setTimeout(function () { closeBtn.focus({ preventScroll: true }); }, 60);
+    }
+    function close() {
+      if (!ov.classList.contains('is-open')) { return; }
+      ov.classList.remove('is-on');
+      ov.setAttribute('aria-hidden', 'true');
+      sheet.style.transform = '';
+      clearInterval(barTimer);
+      closeT = setTimeout(function () {
+        ov.classList.remove('is-open');
+        document.documentElement.style.overflow = '';
+        if (lastFocus && lastFocus.focus) { lastFocus.focus({ preventScroll: true }); }
+      }, 420);
+    }
+    closeBtn.addEventListener('click', close);
+    scroller.addEventListener('click', function (e) {
+      if (e.target.closest('.adv-pop__share, .adv-pop__card, .adv-pop__promo, .adv-pop__more--m, .adv-pop-ov__close')) { return; }
+      close();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && ov.classList.contains('is-on')) { close(); }
+    });
+
+    /* телефон: закрыть свайпом вниз */
+    var sy = 0, dy = 0, drag = false;
+    scroller.addEventListener('touchstart', function (e) {
+      if (scroller.scrollTop > 0 || window.innerWidth > 1099) { drag = false; return; }
+      drag = true; dy = 0; sy = e.touches[0].clientY;
+    }, { passive: true });
+    scroller.addEventListener('touchmove', function (e) {
+      if (!drag) { return; }
+      dy = e.touches[0].clientY - sy;
+      if (0 >= dy) { dy = 0; sheet.style.transform = ''; ov.classList.remove('is-drag'); return; }
+      if (scroller.scrollTop > 0) { drag = false; return; }
+      ov.classList.add('is-drag');
+      sheet.style.transform = 'translateY(' + dy + 'px)';
+      if (e.cancelable) { e.preventDefault(); }
+    }, { passive: false });
+    scroller.addEventListener('touchend', function () {
+      if (!drag) { return; }
+      drag = false;
+      ov.classList.remove('is-drag');
+      if (dy > 110) { close(); } else { sheet.style.transform = ''; }
+    });
+
+    /* кнопка «Открыть подарок дня»: ссылка из href; пока "#" — подсказка */
+    var gift = ov.querySelector('[data-adv-gift]');
+    if (gift) {
+      var href = gift.getAttribute('href') || '';
+      if (href && href !== '#') { gift.target = '_blank'; gift.rel = 'noopener'; }
+      else {
+        gift.addEventListener('click', function (e) { e.preventDefault(); showToast('Подарок скоро появится здесь 🎁'); });
+      }
+    }
+
+    ov._adv = { open: open, close: close };
+    return ov._adv;
   }
+
+  function findDay(n) { return document.querySelector('.adv-pop-ov[data-day="' + n + '"]'); }
+  window.advOpenDay = function (n) {
+    var ov = findDay(n);
+    if (ov) { setup(ov).open(); return; }
+    showToast('Поп-ап дня ' + n + ' скоро появится 🎁');
+  };
+  /* окна, которые уже есть на странице, сразу убираем из Zero-блоков */
+  function setupAll() { [].forEach.call(document.querySelectorAll('.adv-pop-ov[data-day]'), setup); }
+  setupAll();
+  if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', setupAll); }
+  window.addEventListener('load', setupAll);
 
   /* Поделиться календарём: любая ссылка #share на странице */
   if (window.advShareReady) { return; }
