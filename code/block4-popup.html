@@ -53,7 +53,18 @@
     }
     .adv-pop-ov__close { top: 12px; right: 12px; width: 42px; height: 42px; }
     .adv-pop-ov .adv-pop { padding-top: 0; }
+    /* окно выше: меньше отступ сверху; крестик внутри окна, поверх верхней плашки (её правый верхний угол) */
+    .adv-pop-ov__sheet { position: relative; padding-top: 12px; }
+    .adv-pop-ov__sheet > .adv-pop-ov__close {
+      position: absolute; top: 37px; right: calc((100% - 0.9 * min(100vw - 32px, 480px)) / 2 + 10px);
+      width: 36px; height: 36px;
+      background: rgba(255, 255, 255, .12);
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, .22);
+    }
+    .adv-pop-ov__sheet > .adv-pop-ov__close svg { width: 16px; height: 16px; }
   }
+  /* крестик всегда ровный круг: без отступов и растяжения от стилей Тильды */
+  .adv-pop-ov__close { padding: 0; margin: 0; min-width: 0; min-height: 0; flex: none; aspect-ratio: 1; line-height: 0; border-radius: 50% !important; box-sizing: border-box; }
   @media (prefers-reduced-motion: reduce) {
     .adv-pop-ov__sheet, .adv-pop-ov__bg { transition: none; }
   }
@@ -234,13 +245,13 @@
     .adv-pop__promo {
       display: block; height: calc(194 * var(--m));
       border-radius: calc(30 * var(--m));
-      background: #f6e4d8;
+      background: #0f182d;
       text-align: center;
     }
     .adv-pop__promo .adv-pop__more { display: none; }
     .adv-pop__promo-text {
       width: auto; max-width: none; margin: calc(24 * var(--m)) 0 0; white-space: nowrap !important;
-      color: #06152b; font-size: calc(19.8 * var(--m)); line-height: 1.15; letter-spacing: -.04em;
+      color: #fff; font-size: calc(19.8 * var(--m)); line-height: 1.15; letter-spacing: -.04em;
     }
     .adv-pop__promo-title { display: inline; font-weight: 600; font-size: inherit; letter-spacing: inherit; }
     .adv-pop__promo-sub { display: block; margin: 0; font-size: inherit; letter-spacing: -.03em; }
@@ -261,9 +272,10 @@
       display: inline-flex;
       width: 100%; height: calc(82 * var(--m));
       border-radius: calc(12.6 * var(--m));
-      background: #06152a; font-size: calc(14.3 * var(--m));
-      box-shadow: 0 calc(38 * var(--m)) calc(35 * var(--m)) calc(-25 * var(--m)) rgba(5, 20, 42, .3);
+      background: #f6e4d8; color: #704f2a; font-size: calc(14.3 * var(--m)); font-weight: 800;
+      box-shadow: none;
     }
+    .adv-pop-ov .adv-pop__more--m { box-shadow: none; }
   }
 
   /* Полоска «Подарок исчезнет через…» сверху карточки дня */
@@ -366,6 +378,16 @@
   var scroller = ov.querySelector('.adv-pop-ov__scroll');
   var sheet = ov.querySelector('.adv-pop-ov__sheet');
   document.body.appendChild(ov);
+
+  /* Крестик: на ПК закреплён в углу экрана, на телефоне лежит внутри окна поверх верхней плашки */
+  var closeBtn = ov.querySelector('.adv-pop-ov__close');
+  var mqMob = window.matchMedia('(max-width: 1099px)');
+  function placeClose() {
+    if (mqMob.matches) { sheet.insertBefore(closeBtn, sheet.firstChild); }
+    else { ov.insertBefore(closeBtn, ov.querySelector('.adv-pop-ov__scroll')); }
+  }
+  placeClose();
+  if (mqMob.addEventListener) { mqMob.addEventListener('change', placeClose); } else if (mqMob.addListener) { mqMob.addListener(placeClose); }
 
   /* Готовые поп-апы дней. Пока сверстан только день 2. */
   var READY = { 2: true };
