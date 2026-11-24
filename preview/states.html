@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Адвент — состояния дней (на утверждение)</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #0b1224; color: #fff; font-family: 'Manrope', Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+  .page { max-width: 1180px; margin: 0 auto; padding: 48px 24px 80px; }
+  h1 { font-size: 30px; letter-spacing: -.04em; margin: 0 0 6px; }
+  .lead { color: rgba(255,255,255,.6); margin: 0 0 36px; font-size: 15px; }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .12em; color: #f6e4d8; margin: 48px 0 16px; font-weight: 700; }
+
+  /* ===== бирки на карте ===== */
+  .pins { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .pin-card { background: radial-gradient(120% 90% at 50% 0%, #22345c 0%, #101b36 70%); border-radius: 24px; padding: 28px 12px 18px; text-align: center; }
+  .pin-card p { margin: 14px 0 0; font-size: 13px; color: rgba(255,255,255,.75); }
+  .pin-card b { display: block; color: #fff; font-size: 14px; margin-bottom: 3px; }
+  .adv-pin { position: relative; display: inline-block; width: 112px; height: 112px; }
+  .adv-pin img { width: 100%; height: 100%; object-fit: contain; display: block; transition: filter .3s; }
+  .badge { position: absolute; right: 2%; top: 2%; width: 32%; aspect-ratio: 1; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,.45), 0 0 0 1.5px rgba(246,228,216,.7); }
+  .badge svg { width: 58%; height: 58%; }
+  .is-open img { filter: none; }
+  .is-today { animation: pulse 2.2s ease-in-out infinite; }
+  .is-today::before { content: ""; position: absolute; left: 50%; top: 50%; width: 170%; height: 170%; transform: translate(-50%,-50%); border-radius: 50%; background: radial-gradient(circle, rgba(255,214,140,.75) 0%, rgba(255,196,110,.28) 38%, rgba(255,190,100,0) 68%); animation: glow 2.2s ease-in-out infinite; z-index: -1; }
+  .is-locked img { filter: saturate(.35) brightness(.72); }
+  .is-locked .badge { background: #14284b; }
+  .is-melted img { filter: grayscale(1) brightness(.5) contrast(.9); opacity: .75; }
+  .is-melted .badge { background: #dfe9f5; box-shadow: 0 2px 6px rgba(0,0,0,.45), 0 0 0 1.5px rgba(255,255,255,.85); }
+  .is-melted::after { content: ""; position: absolute; inset: 8% 8% 0; border-radius: 30%; background: linear-gradient(180deg, rgba(205,225,245,0) 40%, rgba(205,225,245,.28) 100%); pointer-events: none; }
+  @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.07); } }
+  @keyframes glow { 0%,100% { opacity: .55; } 50% { opacity: 1; } }
+
+  /* ===== окна ===== */
+  .pops { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; align-items: start; }
+  .pop { position: relative; border-radius: 28px; padding: 30px 26px 26px; background: #0f182d; box-shadow: 0 0 0 1px rgba(246,228,216,.12), 0 30px 60px -30px rgba(0,0,0,.8); overflow: hidden; text-align: center; }
+  .pop__x { position: absolute; top: 14px; right: 14px; width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,.08); display: flex; align-items: center; justify-content: center; }
+  .pop__x svg { width: 14px; height: 14px; }
+  .pop__ico { width: 64px; height: 64px; margin: 4px auto 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+  .pop__ico svg { width: 30px; height: 30px; }
+  .pop__day { font-size: 12px; text-transform: uppercase; letter-spacing: .14em; color: #f6e4d8; font-weight: 700; margin: 0 0 8px; }
+  .pop__title { margin: 0 0 10px; font-size: 24px; line-height: 1.08; letter-spacing: -.05em; font-weight: 700; }
+  .pop__text { margin: 0 0 20px; font-size: 14px; line-height: 1.35; letter-spacing: -.02em; color: rgba(255,255,255,.7); }
+  .timer { display: flex; justify-content: center; gap: 8px; margin: 0 0 22px; }
+  .timer div { width: 62px; padding: 10px 0 8px; border-radius: 14px; background: rgba(246,228,216,.08); box-shadow: inset 0 0 0 1px rgba(246,228,216,.14); }
+  .timer b { display: block; font-size: 24px; font-weight: 700; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+  .timer span { display: block; margin-top: 2px; font-size: 10px; color: rgba(255,255,255,.55); text-transform: uppercase; letter-spacing: .08em; }
+  .btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; height: 58px; border-radius: 13px; border: 0; font: 700 12.5px/1 'Manrope', Arial; text-transform: uppercase; letter-spacing: .02em; color: #fff; background: #3b507d; box-shadow: 0 37px 34px -25px rgba(0,0,0,.35); cursor: pointer; }
+  .btn--ghost { background: rgba(255,255,255,.04); box-shadow: inset 0 0 0 1px rgba(255,255,255,.18); margin-top: 10px; }
+  .btn--tg { background: #2aabee; }
+  .pop--locked .pop__ico { background: #14284b; box-shadow: 0 0 0 1.5px rgba(246,228,216,.5); }
+  .pop--melted { background: linear-gradient(180deg, #13213f 0%, #0f182d 60%); }
+  .pop--melted .pop__ico { background: #dfe9f5; }
+  .snow { position: absolute; inset: 0; pointer-events: none; opacity: .5; background-image: radial-gradient(2px 2px at 20% 30%, #fff 50%, transparent 51%), radial-gradient(1.5px 1.5px at 70% 18%, #fff 50%, transparent 51%), radial-gradient(2px 2px at 85% 60%, #fff 50%, transparent 51%), radial-gradient(1.5px 1.5px at 35% 75%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 55% 45%, #fff 50%, transparent 51%); }
+
+  /* полоска таймера в открытом подарке */
+  .gift { padding: 0; text-align: left; background: #0f182d; }
+  .gift__bar { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 12px 16px; background: rgba(246,228,216,.1); box-shadow: inset 0 -1px 0 rgba(246,228,216,.12); font-size: 13px; color: #f6e4d8; letter-spacing: -.01em; }
+  .gift__bar b { font-variant-numeric: tabular-nums; color: #fff; font-weight: 700; }
+  .gift__bar i { width: 8px; height: 8px; border-radius: 50%; background: #ffcf8a; box-shadow: 0 0 0 4px rgba(255,207,138,.18); animation: glow 1.4s ease-in-out infinite; }
+  .gift__bar.is-hot { background: rgba(255,120,90,.14); color: #ffc9b8; }
+  .gift__bar.is-hot i { background: #ff8a6a; box-shadow: 0 0 0 4px rgba(255,138,106,.2); }
+  .gift__body { padding: 26px 26px 26px; text-align: center; }
+  .gift__ph { height: 150px; border-radius: 18px; background: linear-gradient(135deg, #2b3f6b, #182748); margin-bottom: 18px; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,.4); font-size: 13px; }
+  .note { margin-top: 14px; font-size: 12.5px; color: rgba(255,255,255,.5); line-height: 1.4; text-align: left; }
+
+  /* toast для мобилки */
+  .toast { margin: 0 auto; max-width: 340px; display: flex; gap: 12px; align-items: center; padding: 14px 16px; border-radius: 18px; background: rgba(16,32,65,.92); box-shadow: 0 0 0 1px rgba(255,255,255,.14), 0 20px 40px -20px rgba(0,0,0,.7); font-size: 13.5px; line-height: 1.3; }
+
+  @media (max-width: 900px) { .pops { grid-template-columns: 1fr; max-width: 380px; margin: 0 auto; } .pins { grid-template-columns: repeat(2, 1fr); } }
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>Состояния дней адвента: на утверждение</h1>
+  <p class="lead">Пример: сейчас 5 декабря, 15:00 по Москве. Дни 1–2 уже растаяли, дни 3 и 4 открыты, 5 — сегодняшний, с 6-го — будущие. Таймеры в макете идут вживую.</p>
+
+  <h2>1. Бирки на карте</h2>
+  <div class="pins">
+    <div class="pin-card"><span class="adv-pin is-today"><img src="https://dashkoy1.github.io/advent-calendar/assets/days/day-05.webp" alt=""></span><p><b>Сегодня</b>яркая, пульсирует и светится</p></div>
+    <div class="pin-card"><span class="adv-pin is-open"><img src="https://dashkoy1.github.io/advent-calendar/assets/days/day-04.webp" alt=""></span><p><b>Открыт (ещё не растаял)</b>яркая, без значка</p></div>
+    <div class="pin-card"><span class="adv-pin is-locked"><img src="https://dashkoy1.github.io/advent-calendar/assets/days/day-07.webp" alt=""><span class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="#f6e4d8" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span></span><p><b>Будущий</b>приглушена, замочек (как сейчас)</p></div>
+    <div class="pin-card"><span class="adv-pin is-melted"><img src="https://dashkoy1.github.io/advent-calendar/assets/days/day-02.webp" alt=""><span class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="#3b507d" stroke-width="2.2" stroke-linecap="round"><path d="M12 2v20M4.2 6.5l15.6 11M19.8 6.5l-15.6 11M9.5 3.5 12 6l2.5-2.5M9.5 20.5 12 18l2.5 2.5"/></svg></span></span><p><b>Растаял</b>серая и темнее, «иней» снизу, снежинка</p></div>
+  </div>
+
+  <h2>2. Что видит посетитель по нажатию</h2>
+  <div class="pops">
+    <!-- открытый день: в поп-апе подарка сверху полоска таймера -->
+    <div>
+      <div class="pop gift">
+        <div class="gift__bar" id="giftBar"><i></i><span>Подарок исчезнет через <b id="tGift">--:--:--</b></span></div>
+        <div class="gift__body">
+          <p class="pop__day">День 4</p>
+          <div class="gift__ph">карточка подарка (как сейчас)</div>
+          <button class="btn">🎁 Забрать подарок</button>
+        </div>
+      </div>
+      <p class="note">Открытый день: поп-ап подарка как утверждён, сверху добавляется полоска с таймером. За последний час до исчезновения она становится тёплой красной.</p>
+    </div>
+
+    <!-- будущий день -->
+    <div>
+      <div class="pop pop--locked">
+        <span class="pop__x"><svg viewBox="0 0 14 14" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M2 2l10 10M12 2 2 12"/></svg></span>
+        <div class="pop__ico"><svg viewBox="0 0 24 24" fill="none" stroke="#f6e4d8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></div>
+        <p class="pop__day">День 7</p>
+        <h3 class="pop__title">Откроется 7 декабря<br>в 12:00</h3>
+        <p class="pop__text">Подарок появится в полдень по Москве и будет доступен 48 часов</p>
+        <div class="timer" id="tLock"><div><b>1</b><span>дн</span></div><div><b>21</b><span>ч</span></div><div><b>00</b><span>мин</span></div><div><b>00</b><span>сек</span></div></div>
+        <button class="btn">🎁 К подарку дня</button>
+      </div>
+      <p class="note">Будущий день: мини-поп-ап с обратным отсчётом. Кнопка ведёт к сегодняшнему подарку. На мобилке окно выезжает снизу, как поп-ап подарка.</p>
+    </div>
+
+    <!-- растаявший день -->
+    <div>
+      <div class="pop pop--melted">
+        <span class="snow"></span>
+        <span class="pop__x"><svg viewBox="0 0 14 14" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M2 2l10 10M12 2 2 12"/></svg></span>
+        <div class="pop__ico"><svg viewBox="0 0 24 24" fill="none" stroke="#3b507d" stroke-width="2.2" stroke-linecap="round"><path d="M12 2v20M4.2 6.5l15.6 11M19.8 6.5l-15.6 11M9.5 3.5 12 6l2.5-2.5M9.5 20.5 12 18l2.5 2.5"/></svg></div>
+        <p class="pop__day">День 2</p>
+        <h3 class="pop__title">Этот подарок растаял ❄️</h3>
+        <p class="pop__text">Каждый подарок живёт 48 часов. Чтобы не пропускать следующие, подпишитесь на наш TG-канал: там напоминаем о новых днях</p>
+        <button class="btn btn--tg">✈️ Перейти в TG-канал</button>
+        <button class="btn btn--ghost">🎁 К подарку дня</button>
+      </div>
+      <p class="note">Прошедший день: окно в холодных тонах, снежинка вместо замка. Главная кнопка ведёт в TG-канал, вторая — к сегодняшнему подарку.</p>
+    </div>
+  </div>
+
+  <h2>3. До 1 декабря и после 2 января</h2>
+  <div class="toast">⏳ Календарь откроется 1 декабря в 12:00 по Москве. Осталось <b id="tStart">&nbsp;6 дн 21 ч</b></div>
+  <p class="note" style="text-align:center">До старта все бирки будущие; кнопка «Открыть подарок дня» на первом экране показывает эту плашку. После 2 января 12:00 все дни растаявшие.</p>
+</div>
+
+<script>
+  /* демо-таймеры от «5 декабря 15:00» */
+  var t0 = Date.now();
+  var GIFT = (21 * 3600) * 1000;          /* день 4 закрывается 6 декабря 12:00 → 21 ч */
+  var LOCK = (45 * 3600) * 1000;          /* день 7 открывается 7 декабря 12:00 → 1 д 21 ч */
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function tick() {
+    var e = Date.now() - t0;
+    var g = Math.max(0, GIFT - e), s = Math.floor(g / 1000);
+    document.getElementById('tGift').textContent = pad(Math.floor(s / 3600)) + ':' + pad(Math.floor(s / 60) % 60) + ':' + pad(s % 60);
+    var l = Math.floor(Math.max(0, LOCK - e) / 1000);
+    var b = document.querySelectorAll('#tLock b');
+    b[0].textContent = Math.floor(l / 86400); b[1].textContent = pad(Math.floor(l / 3600) % 24); b[2].textContent = pad(Math.floor(l / 60) % 60); b[3].textContent = pad(l % 60);
+  }
+  tick(); setInterval(tick, 1000);
+</script>
+</body>
+</html>
