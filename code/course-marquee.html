@@ -1,0 +1,54 @@
+<!-- =========================================================
+     БЕГУЩАЯ СТРОКА ФОТО в блоке «курс».
+     • фото: файлы m-01.webp … m-10.webp на GitHub (assets/marquee); список повторён 2 раза — так строка бесшовная;
+     • скорость: --adv-mq-time (больше секунд — медленнее);
+     • размер строки = размер этого HTML-элемента в Зеро (фото всегда во всю его высоту).
+     ========================================================= -->
+<style>
+  .t396__elem:has(> .tn-atom > .adv-mq), .t396__elem:has(.adv-mq) { overflow: visible; }
+  .adv-mq {
+    --adv-mq-time: 90s;
+    position: absolute; inset: 0; overflow: hidden;
+    container-type: size;
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 9%);
+            mask-image: linear-gradient(90deg, transparent 0, #000 9%);
+  }
+  .adv-mq__track {
+    display: flex; height: 100%; width: max-content;
+    animation: adv-mq var(--adv-mq-time) linear infinite;
+    will-change: transform;
+  }
+  .adv-mq__track img {
+    display: block; flex: none;
+    height: 100%; width: auto; aspect-ratio: 1442 / 1839;
+    margin-right: 18px; margin-right: 6.23cqh;
+    border-radius: 25px; border-radius: 8.65cqh;
+    object-fit: cover;
+    -webkit-user-drag: none; user-select: none; pointer-events: none;
+  }
+  @keyframes adv-mq { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(-50%, 0, 0); } }
+  /* телефон и планшет: строка во всю ширину, без затухания слева */
+  @media (max-width: 959px) {
+    .adv-mq { -webkit-mask-image: none; mask-image: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .adv-mq__track { animation-duration: 240s; }
+  }
+</style>
+<div class="adv-mq" aria-hidden="true"><div class="adv-mq__track"></div></div>
+<script>
+(function () {
+  var BASE = 'https://dashkoy1.github.io/advent-calendar/assets/marquee/m-';
+  var N = 10;
+  document.querySelectorAll('.adv-mq__track').forEach(function (track) {
+    if (track.children.length) { return; }
+    var html = '';
+    for (var r = 0; r < 2; r++) {
+      for (var i = 1; i <= N; i++) {
+        html += '<img src="' + BASE + (i < 10 ? '0' + i : i) + '.webp" alt="" decoding="async" draggable="false">';
+      }
+    }
+    track.innerHTML = html;
+  });
+})();
+</script>
