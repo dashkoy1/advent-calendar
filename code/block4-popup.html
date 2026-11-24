@@ -7,6 +7,12 @@
   .t396 .t396__artboard:has(.adv-pop-anchor), .t396__artboard:has(.adv-pop-anchor) .t396__carrier, .t396__artboard:has(.adv-pop-anchor) .t396__filter {
     height: 0 !important; min-height: 0 !important;
   }
+  /* автомасштаб Тильды задаёт высоту правилом с #recID — перебиваем двойным :not(#…) (сильнее одного id) */
+  .t396__artboard:has(.adv-pop-anchor):not(#adv-x):not(#adv-y),
+  .t396__artboard:has(.adv-pop-anchor):not(#adv-x):not(#adv-y) .t396__carrier,
+  .t396__artboard:has(.adv-pop-anchor):not(#adv-x):not(#adv-y) .t396__filter {
+    height: 0 !important; min-height: 0 !important;
+  }
 
   /* ===== Окно поп-апа ===== */
   .adv-pop-ov { position: fixed; inset: 0; z-index: 100001; display: none; }
