@@ -1,0 +1,27 @@
+<style>
+  /* Тень синих кнопок, как в Figma (исходник: src/btn-shadow.html)
+     HTML-элемент служебный, на странице его не видно. Классы в поле «CSS class name» кнопки: adv-shadow-blue / adv-shadow-dark. */
+  .t396__elem:has(.adv-shadow-css) { pointer-events: none !important; }
+  .adv-shadow-blue .tn-atom { box-shadow: 0 36.65px 33.59px -24.43px rgba(59, 80, 125, .35); }
+  .adv-shadow-dark .tn-atom { box-shadow: 0 36.65px 33.59px -24.43px rgba(0, 0, 0, .3); }
+  @media (max-width: 1199px) {
+    .adv-shadow-blue .tn-atom { box-shadow: 0 29.32px 26.87px -19.54px rgba(59, 80, 125, .35); }
+    .adv-shadow-dark .tn-atom { box-shadow: 0 29.32px 26.87px -19.54px rgba(0, 0, 0, .3); }
+  }
+  @media (max-width: 959px) {
+    .adv-shadow-blue .tn-atom { box-shadow: 0 75.24px 68.96px -50.15px rgba(59, 80, 125, .35); }
+    .adv-shadow-dark .tn-atom { box-shadow: 0 75.24px 68.96px -50.15px rgba(0, 0, 0, .3); }
+  }
+  @media (max-width: 639px) {
+    .adv-shadow-blue .tn-atom { box-shadow: 0 56.43px 51.72px -37.61px rgba(59, 80, 125, .35); }
+    .adv-shadow-dark .tn-atom { box-shadow: 0 56.43px 51.72px -37.61px rgba(0, 0, 0, .3); }
+  }
+  @media (max-width: 479px) {
+    .adv-shadow-blue .tn-atom { box-shadow: 0 42.32px 38.79px -28.21px rgba(59, 80, 125, .35); }
+    .adv-shadow-dark .tn-atom { box-shadow: 0 42.32px 38.79px -28.21px rgba(0, 0, 0, .3); }
+    /* Кнопка первого экрана: у него сетка 360, а не 320, и Тильда не принимает дробный шрифт —
+       дотягиваем до точного вида кнопок остальных блоков (12px и скругление 13px на сетке 320). */
+    #rec5585652001 .tn-elem[data-elem-id="1794126288446"] .tn-atom { font-size: 13.5px !important; border-radius: 14.6px !important; letter-spacing: .34px !important; }
+  }
+</style>
+<div class="adv-shadow-css" hidden></div>
