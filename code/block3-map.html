@@ -121,6 +121,71 @@
   .adv-map__toast { bottom: calc(24px + var(--vb, 0px)); opacity: 0; transform: translate(-50%, 8px); }
   .adv-map__toast.is-on { opacity: 1; transform: translate(-50%, 0); }
 
+  /* растаявшие дни: серые и темнее закрытых, «иней» снизу и снежинка */
+  .adv-pin__frost { display: none; }
+  .adv-pin.is-melted .adv-pin__img { filter: grayscale(1) brightness(.5) contrast(.9); opacity: .8; }
+  .adv-pin.is-melted .adv-pin__frost {
+    display: block; opacity: .55;
+    filter: grayscale(1) brightness(2.4) sepia(.25) hue-rotate(180deg);
+    -webkit-mask-image: linear-gradient(to top, #000 0%, rgba(0, 0, 0, .35) 30%, transparent 55%);
+    mask-image: linear-gradient(to top, #000 0%, rgba(0, 0, 0, .35) 30%, transparent 55%);
+  }
+  .adv-pin.is-melted .adv-pin__in::after {
+    content: ""; position: absolute; right: 2%; top: 2%; z-index: 2;
+    width: 30%; aspect-ratio: 1; border-radius: 50%;
+    background: #dfe9f5 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233b507d' stroke-width='2.2' stroke-linecap='round'%3E%3Cpath d='M12 2v20M4.2 6.5l15.6 11M19.8 6.5l-15.6 11M9.5 3.5 12 6l2.5-2.5M9.5 20.5 12 18l2.5 2.5'/%3E%3C/svg%3E") center / 58% no-repeat;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .45), 0 0 0 1.5px rgba(255, 255, 255, .85);
+  }
+
+  /* мини-окно закрытого дня (лежит в body поверх страницы) */
+  .adv-dp { position: fixed; inset: 0; z-index: 100002; display: none; align-items: center; justify-content: center; padding: 16px; font-family: 'Manrope', Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+  .adv-dp.is-open { display: flex; }
+  .adv-dp, .adv-dp * { box-sizing: border-box; }
+  .adv-dp__bg { position: absolute; inset: 0; background: rgba(6, 12, 28, .62); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); opacity: 0; transition: opacity .3s ease; }
+  .adv-dp__box {
+    position: relative; overflow: hidden; width: 100%; max-width: 380px;
+    padding: 30px 26px 26px; border-radius: 28px; text-align: center; color: #fff;
+    background: #0f182d; box-shadow: 0 0 0 1px rgba(246, 228, 216, .12), 0 30px 60px -30px rgba(0, 0, 0, .8);
+    opacity: 0; transform: translateY(24px) scale(.98); transition: opacity .3s ease, transform .4s cubic-bezier(.2, .8, .2, 1);
+  }
+  .adv-dp.is-on .adv-dp__bg { opacity: 1; }
+  .adv-dp.is-on .adv-dp__box { opacity: 1; transform: none; }
+  .adv-dp__x { position: absolute; top: 14px; right: 14px; z-index: 2; width: 34px; height: 34px; border: 0; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; background: rgba(255, 255, 255, .08); color: #fff; }
+  .adv-dp__x:hover { background: rgba(255, 255, 255, .16); }
+  .adv-dp__x svg { width: 14px; height: 14px; }
+  .adv-dp__ico { width: 64px; height: 64px; margin: 4px auto 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+  .adv-dp__ico svg { width: 30px; height: 30px; }
+  .adv-dp__day { margin: 0 0 8px; font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: #f6e4d8; }
+  .adv-dp__title { margin: 0 0 10px; font-size: 24px; line-height: 1.08; font-weight: 700; letter-spacing: -.05em; color: #fff; }
+  .adv-dp__text { margin: 0 0 20px; font-size: 14px; line-height: 1.35; letter-spacing: -.02em; color: rgba(255, 255, 255, .7); }
+  .adv-dp__timer { display: none; justify-content: center; gap: 8px; margin: 0 0 22px; }
+  .adv-dp.is-locked .adv-dp__timer { display: flex; }
+  .adv-dp__timer div { width: 62px; padding: 10px 0 8px; border-radius: 14px; background: rgba(246, 228, 216, .08); box-shadow: inset 0 0 0 1px rgba(246, 228, 216, .14); }
+  .adv-dp__timer b { display: block; font-size: 24px; font-weight: 700; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+  .adv-dp__timer span { display: block; margin-top: 2px; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: rgba(255, 255, 255, .55); }
+  .adv-dp__btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; height: 58px;
+    border: 0; border-radius: 13px; cursor: pointer; text-decoration: none;
+    font: 700 12.5px/1 'Manrope', Arial, sans-serif; letter-spacing: .02em; text-transform: uppercase; color: #fff;
+    background: #3b507d; box-shadow: 0 37px 34px -25px rgba(0, 0, 0, .35);
+    transition: filter .2s ease, transform .2s ease;
+  }
+  .adv-dp__btn:hover { filter: brightness(1.08); }
+  .adv-dp__btn:active { transform: scale(.98); }
+  .adv-dp__btn[hidden] { display: none; }
+  .adv-dp__btn--tg { background: #2aabee; }
+  .adv-dp__btn--tg + .adv-dp__btn--today { margin-top: 10px; background: rgba(255, 255, 255, .04); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .18); }
+  .adv-dp.is-locked .adv-dp__ico { background: #14284b; box-shadow: 0 0 0 1.5px rgba(246, 228, 216, .5); }
+  .adv-dp.is-melted .adv-dp__box { background: linear-gradient(180deg, #13213f 0%, #0f182d 60%); }
+  .adv-dp.is-melted .adv-dp__ico { background: #dfe9f5; }
+  .adv-dp__snow { display: none; position: absolute; inset: 0; pointer-events: none; opacity: .5; background-image: radial-gradient(2px 2px at 20% 30%, #fff 50%, transparent 51%), radial-gradient(1.5px 1.5px at 70% 18%, #fff 50%, transparent 51%), radial-gradient(2px 2px at 85% 60%, #fff 50%, transparent 51%), radial-gradient(1.5px 1.5px at 35% 75%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 55% 45%, #fff 50%, transparent 51%); }
+  .adv-dp.is-melted .adv-dp__snow { display: block; }
+  @media (max-width: 639px) {
+    .adv-dp { align-items: flex-end; padding: 0; }
+    .adv-dp__box { max-width: none; border-radius: 28px 28px 0 0; padding: 34px 22px calc(22px + env(safe-area-inset-bottom)); transform: translateY(100%); }
+  }
+  @media (prefers-reduced-motion: reduce) { .adv-dp__box, .adv-dp__bg { transition: none; } }
+
   @media (max-width: 639px) {
     .adv-map__ui { right: 10px; bottom: calc(10px + var(--vb, 0px)); gap: 6px; }
     .adv-map__btn { width: 40px; height: 40px; border-radius: 10px; }
@@ -187,19 +252,56 @@
   ];
   var MONTHS = 'декабря';
 
-  /* Какой сегодня день по Москве (UTC+3). Для проверки: ?advday=5 */
-  function mskToday() {
-    var q = window.location.search.match(/[?&]advday=(\d+)/);
-    if (q) { return parseInt(q[1], 10); }
-    var d = new Date(Date.now() + 3 * 3600 * 1000);
-    var y = d.getUTCFullYear(), m = d.getUTCMonth(), day = d.getUTCDate();
-    if (y > 2026 || (y === 2026 && m === 11 && day > 31)) { return 32; }
-    if (y === 2026 && m === 11) { return day; }
-    return 0;
+  /* ===== Время календаря =====
+     День N открывается N декабря в 12:00 по Москве и тает ровно через 48 часов.
+     Время берём с сервера (заголовок Date), а не с часов посетителя.
+     Проверка: ?test=2026-12-05T11:59 — страница «как будто» в этот момент по Москве (часы дальше идут). */
+  var YEAR = 2026;
+  var TG_URL = 'https://t.me/+-iHsZ5t3xrk4NTky';
+  var HOUR = 3600 * 1000, LIFE = 48 * HOUR;
+  function openAt(n) { return Date.UTC(YEAR, 11, n, 9, 0, 0); } /* 12:00 МСК = 09:00 UTC */
+  function closeAt(n) { return openAt(n) + LIFE; }
+  var clock = (function () {
+    var t0 = Date.now(), base = null, off = 0;
+    var q = window.location.search.match(/[?&]test=(\d{4})-(\d{1,2})-(\d{1,2})(?:[T ](\d{1,2}):(\d{2}))?/);
+    if (q) {
+      base = Date.UTC(+q[1], +q[2] - 1, +q[3], (q[4] ? +q[4] : 12) - 3, q[5] ? +q[5] : 0);
+    } else {
+      var a = window.location.search.match(/[?&]advday=(\d+)/); /* старая тестовая ссылка: N декабря, 15:00 */
+      if (a) { base = Date.UTC(YEAR, 11, +a[1], 12, 0); }
+    }
+    return {
+      test: base !== null,
+      now: function () { return base !== null ? base + (Date.now() - t0) : Date.now() + off; },
+      sync: function (cb) {
+        if (base !== null || !window.fetch) { return; }
+        var s = Date.now();
+        fetch(window.location.href.split('#')[0], { method: 'HEAD', cache: 'no-store', credentials: 'same-origin' })
+          .then(function (r) {
+            var d = Date.parse(r.headers.get('date') || '');
+            if (!isNaN(d)) { var e = Date.now(); off = d + 500 + (e - s) / 2 - e; cb(); }
+          })
+          .catch(function () {});
+      }
+    };
+  })();
+  /* состояние дня: locked — ещё не открылся, open — открыт, today — последний открывшийся, melted — растаял */
+  function dayState(n, t) {
+    t = t || clock.now();
+    if (openAt(n) > t) { return 'locked'; }
+    if (t >= closeAt(n)) { return 'melted'; }
+    return n === todayNum(t) ? 'today' : 'open';
   }
-  var today = mskToday();
-  /* ВРЕМЕННО для проверки: эти дни открыты всем раньше срока. Перед запуском очистить: { } */
-  var FORCE_OPEN = { 2: true };
+  /* номер последнего открывшегося дня: 0 — календарь ещё не начался, 32 — все подарки растаяли */
+  function todayNum(t) {
+    t = t || clock.now();
+    if (openAt(1) > t) { return 0; }
+    if (t >= closeAt(31)) { return 32; }
+    var n = 31;
+    while (n > 1 && openAt(n) > t) { n--; }
+    return n;
+  }
+  window.advTime = { now: clock.now, openAt: openAt, closeAt: closeAt, state: dayState, today: todayNum, tg: TG_URL };
 
   /* Отметки: каждая — одна картинка из Figma (вид: dec — «Декабря», star — цветок, card — карточка) */
   var IMGD = 'https://dashkoy1.github.io/advent-calendar/assets/days/day-';
@@ -222,10 +324,6 @@
     b.style.height = bh.toFixed(1) + 'px';
     b.style.marginLeft = (-bw / 2).toFixed(1) + 'px';
     b.style.marginTop = (-bh / 2).toFixed(1) + 'px';
-    var state = it[0] > today ? 'locked' : (it[0] === today ? 'today' : 'open');
-    if (state === 'locked' && FORCE_OPEN[it[0]]) { state = 'open'; }
-    b.classList.add('is-' + state);
-    b.setAttribute('aria-label', 'День ' + it[0] + (state === 'locked' ? ', откроется ' + it[0] + ' ' + MONTHS : ''));
     var inner = document.createElement('span');
     inner.className = 'adv-pin__in';
     var im = document.createElement('img');
@@ -238,15 +336,36 @@
     im.style.height = (kd.ih * K).toFixed(1) + 'px';
     im.src = IMGD + (it[0] > 9 ? '' : '0') + it[0] + '.webp';
     inner.appendChild(im);
+    /* «иней» для растаявшего дня: светлая копия отметки, проявляется снизу */
+    var fr = im.cloneNode(false);
+    fr.className = 'adv-pin__img adv-pin__frost';
+    inner.appendChild(fr);
     b.appendChild(inner);
     b.addEventListener('click', function (e) {
       e.stopPropagation();
       if (moved) { return; }
-      onPin(it, state);
+      onPin(it, dayState(it[0]));
     });
     world.appendChild(b);
     pins.push(b);
   });
+
+  /* Раскраска отметок по времени; пересчитываем, когда день открывается или тает */
+  var STATE_LABEL = { locked: ', откроется ', today: ', подарок сегодня', open: ', подарок открыт', melted: ', подарок растаял' };
+  function paintPins() {
+    var t = clock.now();
+    pins.forEach(function (b, i) {
+      var n = i + 1, s = dayState(n, t);
+      if (b.getAttribute('data-state') === s) { return; }
+      b.classList.remove('is-locked', 'is-open', 'is-today', 'is-melted');
+      b.classList.add('is-' + s);
+      b.setAttribute('data-state', s);
+      b.setAttribute('aria-label', 'День ' + n + STATE_LABEL[s] + (s === 'locked' ? n + ' ' + MONTHS + ' в 12:00' : ''));
+    });
+  }
+  paintPins();
+  clock.sync(paintPins);
+  setInterval(paintPins, 1000);
 
   /* Камера: x, y — сдвиг, k — масштаб */
   var x = 0, y = 0, k = 1, minK = 1, maxK = 4;
@@ -682,9 +801,9 @@
   /* Нажатие на день */
   function onPin(it, state) {
     var cx = it[1] / 100 * W, cy = it[2] / 100 * H;
-    if (state === 'locked') {
+    if (state === 'locked' || state === 'melted') {
       flyTo(Math.max(k, minK * 1.8), cx, cy, 600);
-      showToast('День ' + it[0] + ' откроется ' + it[0] + ' ' + MONTHS + ' в 00:00 по Москве');
+      dayPop(it[0], state);
       return;
     }
     flyTo(Math.max(k, minK * 2.4), cx, cy, 800, function () { openDay(it[0]); });
@@ -696,12 +815,86 @@
 
   /* Кнопка «Открыть подарок дня» с главного экрана (#advent-map) */
   function goToday() {
-    var d = today;
-    if (1 > d) { flyTo(minK, W / 2, H / 2, 500); showToast('Календарь откроется 1 декабря в 00:00 по Москве'); return; }
-    if (d > 31) { d = 31; }
-    var it = DAYS[d - 1];
-    onPin(it, 'today');
+    var d = todayNum();
+    if (1 > d) {
+      flyTo(minK, W / 2, H / 2, 500);
+      showToast('Календарь откроется 1 декабря в 12:00 по Москве. Осталось ' + left(openAt(1) - clock.now()));
+      return;
+    }
+    if (d > 31) { flyTo(minK, W / 2, H / 2, 500); dayPop(0, 'melted'); return; }
+    onPin(DAYS[d - 1], 'today');
   }
+  function left(ms) {
+    var m = Math.max(0, Math.ceil(ms / 60000)), d = Math.floor(m / 1440), h = Math.floor(m / 60) % 24;
+    return d ? d + ' дн ' + h + ' ч' : (h ? h + ' ч ' + (m % 60) + ' мин' : (m % 60) + ' мин');
+  }
+
+  /* ===== Мини-окно закрытого дня: «Откроется N декабря» / «Подарок растаял» ===== */
+  var dp = document.createElement('div');
+  dp.className = 'adv-dp';
+  dp.setAttribute('role', 'dialog');
+  dp.setAttribute('aria-modal', 'true');
+  dp.setAttribute('aria-hidden', 'true');
+  dp.innerHTML = '<div class="adv-dp__bg"></div><div class="adv-dp__box">' +
+    '<button class="adv-dp__x" type="button" aria-label="Закрыть"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 2l10 10M12 2 2 12"/></svg></button>' +
+    '<span class="adv-dp__snow" aria-hidden="true"></span>' +
+    '<div class="adv-dp__ico" aria-hidden="true"></div>' +
+    '<p class="adv-dp__day"></p><h3 class="adv-dp__title"></h3><p class="adv-dp__text"></p>' +
+    '<div class="adv-dp__timer" aria-hidden="true"><div><b>0</b><span>дн</span></div><div><b>00</b><span>ч</span></div><div><b>00</b><span>мин</span></div><div><b>00</b><span>сек</span></div></div>' +
+    '<a class="adv-dp__btn adv-dp__btn--tg" href="' + TG_URL + '" target="_blank" rel="noopener">✈️ Перейти в TG-канал</a>' +
+    '<button class="adv-dp__btn adv-dp__btn--today" type="button">🎁 К подарку дня</button>' +
+    '</div>';
+  document.body.appendChild(dp);
+  var ICO_LOCK = '<svg viewBox="0 0 24 24" fill="none" stroke="#f6e4d8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
+  var ICO_SNOW = '<svg viewBox="0 0 24 24" fill="none" stroke="#3b507d" stroke-width="2.2" stroke-linecap="round"><path d="M12 2v20M4.2 6.5l15.6 11M19.8 6.5l-15.6 11M9.5 3.5 12 6l2.5-2.5M9.5 20.5 12 18l2.5 2.5"/></svg>';
+  var dpEl = function (s) { return dp.querySelector(s); };
+  var dpTimer = 0, dpDay = 0, dpCloseT = 0, dpFocus = null;
+  function pad2(v) { return (v > 9 ? '' : '0') + v; }
+  function dpTick() {
+    var ms = openAt(dpDay) - clock.now();
+    if (0 >= ms) { /* день открылся, пока окно было открыто */
+      dpClose(); paintPins(); onPin(DAYS[dpDay - 1], dayState(dpDay)); return;
+    }
+    var s = Math.floor(ms / 1000), b = dp.querySelectorAll('.adv-dp__timer b');
+    b[0].textContent = Math.floor(s / 86400); b[1].textContent = pad2(Math.floor(s / 3600) % 24);
+    b[2].textContent = pad2(Math.floor(s / 60) % 60); b[3].textContent = pad2(s % 60);
+  }
+  function dayPop(n, state) {
+    clearTimeout(dpCloseT); clearInterval(dpTimer);
+    dpDay = n; dpFocus = document.activeElement;
+    var melted = state === 'melted';
+    dp.classList.toggle('is-melted', melted);
+    dp.classList.toggle('is-locked', !melted);
+    dpEl('.adv-dp__ico').innerHTML = melted ? ICO_SNOW : ICO_LOCK;
+    dpEl('.adv-dp__day').textContent = n ? 'День ' + n : 'Адвент завершён';
+    dpEl('.adv-dp__title').innerHTML = melted ? (n ? 'Этот подарок растаял ❄️' : 'Все подарки растаяли ❄️') : 'Откроется ' + n + ' ' + MONTHS + '<br>в 12:00';
+    dpEl('.adv-dp__text').textContent = melted
+      ? 'Каждый подарок живёт 48 часов. Чтобы не пропускать следующие, подпишитесь на наш TG-канал: там напоминаем о новых днях'
+      : 'Подарок появится в полдень по Москве и будет доступен 48 часов';
+    var td = todayNum();
+    dpEl('.adv-dp__btn--today').hidden = !(td >= 1 && 31 >= td && dayState(td) !== 'melted');
+    dpEl('.adv-dp__btn--tg').hidden = !melted;
+    if (!melted) { dpTick(); dpTimer = setInterval(dpTick, 1000); }
+    dp.classList.add('is-open');
+    dp.setAttribute('aria-hidden', 'false');
+    requestAnimationFrame(function () { requestAnimationFrame(function () { dp.classList.add('is-on'); }); });
+    setTimeout(function () { dpEl('.adv-dp__x').focus({ preventScroll: true }); }, 60);
+  }
+  function dpClose() {
+    clearInterval(dpTimer);
+    dp.classList.remove('is-on');
+    dp.setAttribute('aria-hidden', 'true');
+    dpCloseT = setTimeout(function () {
+      dp.classList.remove('is-open');
+      if (dpFocus && dpFocus.focus) { dpFocus.focus({ preventScroll: true }); }
+    }, 350);
+  }
+  dpEl('.adv-dp__x').addEventListener('click', dpClose);
+  dpEl('.adv-dp__bg').addEventListener('click', dpClose);
+  dpEl('.adv-dp__btn--today').addEventListener('click', function () { dpClose(); setTimeout(goToday, 200); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && dp.classList.contains('is-open')) { e.stopImmediatePropagation(); dpClose(); }
+  }, true);
   document.addEventListener('click', function (e) {
     var a = e.target.closest('a[href="#advent-map"], a[href$="#advent-map"]');
     if (!a) { return; }

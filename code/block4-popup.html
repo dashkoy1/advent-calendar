@@ -266,6 +266,29 @@
     }
   }
 
+  /* Полоска «Подарок исчезнет через…» сверху карточки дня */
+  .adv-pop__timer {
+    position: absolute; left: 0; right: 0; top: 0; z-index: 1;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    padding: 12px 16px;
+    background: rgba(15, 24, 45, .55); color: #f6e4d8;
+    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+    box-shadow: inset 0 -1px 0 rgba(246, 228, 216, .14);
+    font-size: max(13px, calc(17 * var(--u))); font-weight: 500; letter-spacing: -.01em; line-height: 1.2;
+  }
+  .adv-pop__timer b { color: #fff; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .adv-pop__timer i {
+    flex: none; width: 8px; height: 8px; border-radius: 50%;
+    background: #ffcf8a; box-shadow: 0 0 0 4px rgba(255, 207, 138, .18);
+    animation: advTimerDot 1.4s ease-in-out infinite;
+  }
+  .adv-pop__timer.is-hot { background: rgba(120, 40, 30, .55); color: #ffc9b8; }
+  .adv-pop__timer.is-hot i { background: #ff8a6a; box-shadow: 0 0 0 4px rgba(255, 138, 106, .2); }
+  .adv-pop__card.has-timer { padding-top: calc(84 * var(--u) + 44px); }
+  @media (max-width: 1099px) { .adv-pop__card.has-timer { padding-top: calc(31 * var(--m) + 44px); } .adv-pop__timer { font-size: 13px; padding: 11px 14px; } }
+  @keyframes advTimerDot { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { .adv-pop__timer i { animation: none; } }
+
   /* Уведомление «Ссылка скопирована» */
   .adv-share-toast {
     position: fixed; left: 50%; bottom: 28px; z-index: 100000;
@@ -347,8 +370,36 @@
   /* Готовые поп-апы дней. Пока сверстан только день 2. */
   var READY = { 2: true };
   var closeT = 0, lastFocus = null;
+
+  /* Таймер «Подарок исчезнет через…»: время и срок дня берём из кода карты (window.advTime) */
+  var card = sec.querySelector('.adv-pop__card');
+  var bar = document.createElement('div');
+  bar.className = 'adv-pop__timer';
+  bar.setAttribute('role', 'timer');
+  bar.innerHTML = '<i aria-hidden="true"></i><span>Подарок исчезнет через <b>--:--:--</b></span>';
+  var barTimer = 0, barDay = 0;
+  function pad2(v) { return (v > 9 ? '' : '0') + v; }
+  function barTick() {
+    var T = window.advTime;
+    var ms = T.closeAt(barDay) - T.now();
+    if (0 >= ms) { bar.innerHTML = '<i aria-hidden="true"></i><span>Этот подарок растаял ❄️</span>'; clearInterval(barTimer); return; }
+    var s = Math.floor(ms / 1000);
+    bar.querySelector('b').textContent = pad2(Math.floor(s / 3600)) + ':' + pad2(Math.floor(s / 60) % 60) + ':' + pad2(s % 60);
+    bar.classList.toggle('is-hot', 3600000 > ms);
+  }
+  function startTimer(n) {
+    clearInterval(barTimer);
+    if (!window.advTime || !card) { return; }
+    barDay = n;
+    bar.innerHTML = '<i aria-hidden="true"></i><span>Подарок исчезнет через <b>--:--:--</b></span>';
+    card.insertBefore(bar, card.firstChild);
+    card.classList.add('has-timer');
+    barTick(); barTimer = setInterval(barTick, 1000);
+  }
+
   function open(n) {
     clearTimeout(closeT);
+    startTimer(n);
     lastFocus = document.activeElement;
     ov.classList.add('is-open');
     ov.setAttribute('aria-hidden', 'false');
@@ -362,6 +413,7 @@
     ov.classList.remove('is-on');
     ov.setAttribute('aria-hidden', 'true');
     sheet.style.transform = '';
+    clearInterval(barTimer);
     closeT = setTimeout(function () {
       ov.classList.remove('is-open');
       document.documentElement.style.overflow = '';
