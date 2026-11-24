@@ -24,7 +24,7 @@
   .t396__elem:has(.adv-ai-screen) .tn-atom { position: relative; }
   .adv-ai-screen {
     position: absolute; z-index: 2; pointer-events: none;
-    left: 26.62%; top: 21.95%; width: 47.24%; height: 47.6%;
+    left: 26.62%; top: 21.95%; width: 47.24%; height: 47.6%; /* запасной вариант, обычно считает скрипт */
     overflow: hidden; background: #0b0c12;
     border-radius: .75% .75% 0 0 / 1.15% 1.15% 0 0;
   }
@@ -71,6 +71,30 @@
     scr.className = 'adv-ai-screen';
     scr.innerHTML = '<video muted loop playsinline preload="none" poster="' + POSTER + '"></video><i></i>';
     atom.appendChild(scr);
+    /* экран считаем по реальному виду картинки: на телефоне Тильда обрезает её (object-fit: cover) */
+    var SX = 384.9, SY = 201.5, SW = 683.1, SH = 437, NW = 1446, NH = 918;
+    function place() {
+      var W = atom.clientWidth, H = atom.clientHeight;
+      if (!W || !H) { return; }
+      var cs = getComputedStyle(img), fit = cs.objectFit;
+      var k, ox = 0, oy = 0;
+      if (fit === 'cover' || fit === 'contain') {
+        k = fit === 'cover' ? Math.max(W / NW, H / NH) : Math.min(W / NW, H / NH);
+        var pos = (cs.objectPosition || '50% 50%').split(' ');
+        var px = parseFloat(pos[0]) / 100, py = parseFloat(pos[1] || pos[0]) / 100;
+        if (isNaN(px)) { px = .5; } if (isNaN(py)) { py = .5; }
+        ox = (W - NW * k) * px; oy = (H - NH * k) * py;
+        scr.style.left = (ox + SX * k) + 'px'; scr.style.top = (oy + SY * k) + 'px';
+        scr.style.width = (SW * k) + 'px'; scr.style.height = (SH * k) + 'px';
+      } else {
+        scr.style.left = scr.style.top = scr.style.width = scr.style.height = '';
+      }
+    }
+    place();
+    if (img.complete) { place(); } else { img.addEventListener('load', place); }
+    window.addEventListener('resize', function () { setTimeout(place, 120); });
+    window.addEventListener('load', place);
+    if ('ResizeObserver' in window) { new ResizeObserver(place).observe(atom); }
     var v = scr.querySelector('video');
     v.muted = true; v.setAttribute('muted', '');
     var loaded = false;
