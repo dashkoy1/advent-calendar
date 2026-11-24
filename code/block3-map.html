@@ -164,17 +164,19 @@
   .adv-dp__timer b { display: block; font-size: 24px; font-weight: 700; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
   .adv-dp__timer span { display: block; margin-top: 2px; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: rgba(255, 255, 255, .55); }
   .adv-dp__btn {
-    display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; height: 58px;
-    border: 0; border-radius: 13px; cursor: pointer; text-decoration: none;
-    font: 700 12.5px/1 'Manrope', Arial, sans-serif; letter-spacing: .02em; text-transform: uppercase; color: #fff;
-    background: #3b507d; box-shadow: 0 37px 34px -25px rgba(0, 0, 0, .35);
-    transition: filter .2s ease, transform .2s ease;
+    /* единый стиль по кнопке «Обсудить проект»: #3b507d → #445b8b, Manrope 12/700, разрядка 0.3px, скругление 12px */
+    display: flex; align-items: center; justify-content: center; gap: 4px; width: 100%; height: 60px;
+    border: 0; border-radius: 12px; cursor: pointer; text-decoration: none;
+    font: 700 12px/1 'Manrope', Arial, sans-serif; letter-spacing: .3px; text-transform: uppercase; color: #fff;
+    background-color: #3b507d; box-shadow: 0 28px 25.5px -18.5px rgba(0, 0, 0, .3);
+    transition: background-color .3s ease, transform .2s ease;
   }
-  .adv-dp__btn:hover { filter: brightness(1.08); }
+  .adv-dp__btn img { width: 10px; height: auto; display: block; flex: none; }
+  .adv-dp__btn:hover { background-color: #445b8b; }
   .adv-dp__btn:active { transform: scale(.98); }
   .adv-dp__btn[hidden] { display: none; }
-  .adv-dp__btn--tg { background: #2aabee; }
-  .adv-dp.is-melted .adv-dp__btn--today { margin-top: 10px; background: rgba(255, 255, 255, .04); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .18); }
+  .adv-dp.is-melted .adv-dp__btn--today { margin-top: 10px; background-color: rgba(255, 255, 255, .04); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .18); }
+  .adv-dp.is-melted .adv-dp__btn--today:hover { background-color: rgba(255, 255, 255, .1); }
   .adv-dp.is-locked .adv-dp__ico { background: #14284b; box-shadow: 0 0 0 1.5px rgba(246, 228, 216, .5); }
   .adv-dp.is-melted .adv-dp__box { background: linear-gradient(180deg, #13213f 0%, #0f182d 60%); }
   .adv-dp.is-melted .adv-dp__ico { background: #dfe9f5; }
@@ -841,8 +843,8 @@
     '<div class="adv-dp__ico" aria-hidden="true"></div>' +
     '<p class="adv-dp__day"></p><h3 class="adv-dp__title"></h3><p class="adv-dp__text"></p>' +
     '<div class="adv-dp__timer" aria-hidden="true"><div><b>0</b><span>дн</span></div><div><b>00</b><span>ч</span></div><div><b>00</b><span>мин</span></div><div><b>00</b><span>сек</span></div></div>' +
-    '<a class="adv-dp__btn adv-dp__btn--tg" href="' + TG_URL + '" target="_blank" rel="noopener">✈️ Перейти в TG-канал</a>' +
-    '<button class="adv-dp__btn adv-dp__btn--today" type="button">🎁 К подарку дня</button>' +
+    '<a class="adv-dp__btn adv-dp__btn--tg" href="' + TG_URL + '" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="11" height="11" fill="#fff" aria-hidden="true"><path d="M21.4 3.6 2.9 10.7c-1.3.5-1.2 1.2-.2 1.5l4.7 1.5 1.8 5.6c.2.6.4.8.9.8.4 0 .6-.2.9-.4l2.3-2.2 4.7 3.5c.9.5 1.5.2 1.7-.8l3.1-14.6c.3-1.3-.5-1.9-1.4-1.5Z"/></svg>Перейти в TG-канал</a>' +
+    '<button class="adv-dp__btn adv-dp__btn--today" type="button"><img src="https://dashkoy1.github.io/advent-calendar/assets/img/gift.svg" alt="">К подарку дня</button>' +
     '</div>';
   document.body.appendChild(dp);
   var ICO_LOCK = '<svg viewBox="0 0 24 24" fill="none" stroke="#f6e4d8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';

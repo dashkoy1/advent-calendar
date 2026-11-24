@@ -99,9 +99,14 @@
     display: inline-flex; align-items: center; justify-content: center; gap: .45em;
     flex: none; cursor: pointer; border: 0;
     text-transform: uppercase; white-space: nowrap; line-height: 1.2;
-    transition: transform .25s ease, filter .25s ease, box-shadow .25s ease;
+    letter-spacing: .025em;
+    transition: transform .25s ease, background-color .3s ease, box-shadow .25s ease;
   }
-  .adv-pop__btn:hover { filter: brightness(1.08); }
+  /* Синие кнопки — единый стиль по кнопке «Обсудить проект»:
+     #3b507d, при наведении #445b8b, Manrope 700, разрядка 0.3px на 12px, скругление ≈15% высоты, тёмная тень */
+  .adv-pop__gift, .adv-pop__more { background-color: #3b507d; color: #fff; font-weight: 700; }
+  .adv-pop__gift:hover, .adv-pop__more:not(.adv-pop__more--m):hover { background-color: #445b8b; }
+  .adv-pop__share-btn:hover, .adv-pop__more--m:hover { filter: brightness(1.04); }
   .adv-pop__btn:active { transform: scale(.98); }
   .adv-pop__btn img { display: block; flex: none; }
 
@@ -115,7 +120,7 @@
     width: calc(272 * var(--u)); height: calc(78.5 * var(--u));
     border-radius: calc(11.8 * var(--u));
     background: radial-gradient(60% 80% at 50% 0%, rgba(255, 245, 232, .7), rgba(255, 245, 232, 0)), #fce6cd;
-    color: #704f2a; font-weight: 800; font-size: max(10px, calc(13.6 * var(--u)));
+    color: #704f2a; font-weight: 700; font-size: max(10px, calc(13.6 * var(--u)));
   }
   .adv-pop__share-text {
     margin: 0; color: #fff;
@@ -160,11 +165,10 @@
     margin-top: calc(30 * var(--u));
     width: calc(391 * var(--u)); height: calc(127 * var(--u));
     border-radius: calc(19.5 * var(--u));
-    background: #3b507d; color: #fff;
-    font-weight: 600; font-size: calc(18.7 * var(--u)); gap: .4em;
-    box-shadow: 0 calc(58 * var(--u)) calc(54 * var(--u)) calc(-39 * var(--u)) rgba(59, 80, 125, .35);
+    font-size: calc(19.3 * var(--u)); gap: .33em;
+    box-shadow: 0 calc(58.9 * var(--u)) calc(54 * var(--u)) calc(-39.3 * var(--u)) rgba(0, 0, 0, .3);
   }
-  .adv-pop__gift img { width: .91em; height: auto; }
+  .adv-pop__gift img { width: .83em; height: auto; }
 
   /* Обучение */
   .adv-pop__promo {
@@ -179,9 +183,8 @@
   .adv-pop__more {
     width: calc(327.6 * var(--u)); height: calc(106.5 * var(--u));
     border-radius: calc(16.4 * var(--u));
-    background: #0f182d; color: #fff;
-    font-weight: 600; font-size: max(11px, calc(15.4 * var(--u)));
-    box-shadow: 0 calc(49 * var(--u)) calc(45 * var(--u)) calc(-33 * var(--u)) rgba(15, 24, 45, .43);
+    font-size: max(11px, calc(16.2 * var(--u)));
+    box-shadow: 0 calc(49.4 * var(--u)) calc(45.3 * var(--u)) calc(-32.9 * var(--u)) rgba(0, 0, 0, .3);
   }
   .adv-pop__more--m { display: none; }
   .adv-pop__promo-text { margin: 0; }
@@ -240,12 +243,11 @@
     .adv-pop__title { max-width: none; }
     .adv-pop__desc { max-width: none; margin: calc(14 * var(--m)) calc(-24 * var(--m)) 0; font-size: calc(15.8 * var(--m)); line-height: 1.29; }
     .adv-pop__gift {
-      flex-direction: row-reverse; gap: calc(10.7 * var(--m));
       margin-top: calc(27.5 * var(--m));
       width: 100%; height: calc(82 * var(--m));
       border-radius: calc(12.6 * var(--m));
-      font-size: calc(14.3 * var(--m));
-      box-shadow: 0 calc(38 * var(--m)) calc(35 * var(--m)) calc(-25 * var(--m)) rgba(59, 80, 125, .5);
+      font-size: max(12px, calc(12.1 * var(--m)));
+      box-shadow: 0 calc(38 * var(--m)) calc(34.9 * var(--m)) calc(-25.4 * var(--m)) rgba(0, 0, 0, .3);
     }
 
     .adv-pop__promo {
@@ -278,7 +280,7 @@
       display: inline-flex;
       width: 100%; height: calc(82 * var(--m));
       border-radius: calc(12.6 * var(--m));
-      background: #f6e4d8; color: #704f2a; font-size: calc(14.3 * var(--m)); font-weight: 800;
+      background: #f6e4d8; color: #704f2a; font-size: max(12px, calc(12.1 * var(--m))); font-weight: 700;
       box-shadow: none;
     }
     .adv-pop-ov .adv-pop__more--m { box-shadow: none; }
