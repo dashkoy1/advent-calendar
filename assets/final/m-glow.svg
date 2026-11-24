@@ -1,0 +1,9 @@
+<svg width="1282" height="576" viewBox="0 0 1282 576" fill="none" xmlns="http://www.w3.org/2000/svg">
+<!-- Ellipse 6450 из Фигмы (982×276, #0F182D, layer blur 94) с запасом 150 px под размытие -->
+<defs>
+<filter id="b" x="0" y="0" width="1282" height="576" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feGaussianBlur stdDeviation="47"/>
+</filter>
+</defs>
+<ellipse cx="641" cy="288" rx="491" ry="138" fill="#0F182D" filter="url(#b)"/>
+</svg>
