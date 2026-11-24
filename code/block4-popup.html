@@ -56,12 +56,12 @@
     /* окно выше: меньше отступ сверху; крестик внутри окна, поверх верхней плашки (её правый верхний угол) */
     .adv-pop-ov__sheet { position: relative; padding-top: 12px; }
     .adv-pop-ov__sheet > .adv-pop-ov__close {
-      position: absolute; top: 37px; right: calc((100% - 0.9 * min(100vw - 32px, 480px)) / 2 + 10px);
-      width: 36px; height: 36px;
+      position: absolute; top: 35px; right: calc((100% - 0.9 * min(100vw - 32px, 480px)) / 2 + 8px);
+      width: 32px; height: 32px;
       background: rgba(255, 255, 255, .12);
       box-shadow: 0 0 0 1px rgba(255, 255, 255, .22);
     }
-    .adv-pop-ov__sheet > .adv-pop-ov__close svg { width: 16px; height: 16px; }
+    .adv-pop-ov__sheet > .adv-pop-ov__close svg { width: 14px; height: 14px; }
   }
   /* крестик всегда ровный круг: без отступов и растяжения от стилей Тильды */
   .adv-pop-ov__close { padding: 0; margin: 0; min-width: 0; min-height: 0; flex: none; aspect-ratio: 1; line-height: 0; border-radius: 50% !important; box-sizing: border-box; }
@@ -243,14 +243,14 @@
     }
 
     .adv-pop__promo {
-      display: block; height: calc(194 * var(--m));
+      display: block; height: calc(194 * var(--m) + 20px);
       border-radius: calc(30 * var(--m));
       background: #0f182d;
       text-align: center;
     }
     .adv-pop__promo .adv-pop__more { display: none; }
     .adv-pop__promo-text {
-      width: auto; max-width: none; margin: calc(24 * var(--m)) 0 0; white-space: nowrap !important;
+      width: auto; max-width: none; margin: calc(24 * var(--m) + 20px) 0 0; white-space: nowrap !important;
       color: #fff; font-size: calc(19.8 * var(--m)); line-height: 1.15; letter-spacing: -.04em;
     }
     .adv-pop__promo-title { display: inline; font-weight: 600; font-size: inherit; letter-spacing: inherit; }
@@ -261,7 +261,7 @@
       position: absolute; overflow: hidden;
       border-radius: calc(12 * var(--m));
       box-shadow: 0 8px 24px -10px rgba(6, 21, 43, .35);
-      transform: translate(-50%, -50%) rotate(var(--r));
+      transform: translate(-50%, calc(-50% + 20px)) rotate(var(--r));
     }
     .adv-pop__photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
     .adv-pop__photo--1 { --r: -22.3deg; left: calc(84.9 * var(--m)); top: calc(186 * var(--m)); width: calc(103.4 * var(--m)); height: calc(131.9 * var(--m)); z-index: 2; }
