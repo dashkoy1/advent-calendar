@@ -78,7 +78,10 @@
     var SX = 382.5, SY = 199.5, SW = 687, SH = 441.5, NW = 1446, NH = 918;
     function place() {
       var hr = host.getBoundingClientRect(), r = img.getBoundingClientRect();
-      var W = r.width, H = r.height;
+      /* артборд у Тильды сам может быть масштабирован — переводим экранные px в px артборда */
+      var f = host.offsetWidth ? hr.width / host.offsetWidth : 1;
+      if (!f || !isFinite(f)) { f = 1; }
+      var W = r.width / f, H = r.height / f;
       if (!W || !H) { return; }
       var cs = getComputedStyle(img), fit = cs.objectFit, k, ox = 0, oy = 0;
       if (fit === 'cover' || fit === 'contain') {
@@ -88,8 +91,8 @@
         if (isNaN(px)) { px = .5; } if (isNaN(py)) { py = .5; }
         ox = (W - NW * k) * px; oy = (H - NH * k) * py;
       } else { k = W / NW; }
-      scr.style.left = (r.left - hr.left + ox + SX * k) + 'px';
-      scr.style.top = (r.top - hr.top + oy + SY * k) + 'px';
+      scr.style.left = ((r.left - hr.left) / f + ox + SX * k) + 'px';
+      scr.style.top = ((r.top - hr.top) / f + oy + SY * k) + 'px';
       scr.style.width = (SW * k) + 'px';
       scr.style.height = (SH * k) + 'px';
       scr.style.zIndex = getComputedStyle(lap).zIndex;
