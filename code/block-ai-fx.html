@@ -27,7 +27,7 @@
     overflow: hidden; background: #0b0c12;
     border-radius: 1% 1% .4% .4% / 1.6% 1.6% .6% .6%;
   }
-  .adv-ai-screen video {
+  .adv-ai-screen video, .adv-ai-screen img {
     position: absolute; inset: 0; width: 100%; height: 100%;
     object-fit: cover; object-position: 50% 100%; display: block; /* лишнее срезаем сверху — там чёрная строка меню */
   }
@@ -63,6 +63,10 @@
   (function () {
     var SRC = 'https://dashkoy1.github.io/advent-calendar/assets/ai/screencast.mp4?v=2';
     var POSTER = 'https://dashkoy1.github.io/advent-calendar/assets/ai/screencast-poster.jpg?v=2';
+    /* анимированная картинка (как гифка, но в 20 раз легче): телефоны её показывают всегда,
+       даже в режиме энергосбережения, и без значка «плей» */
+    var ANIM = 'https://dashkoy1.github.io/advent-calendar/assets/ai/screencast-anim.webp?v=1';
+    var PHONE = window.matchMedia && window.matchMedia('(max-width: 959px), (hover: none)').matches;
     var scope = ab || document;
     var img = scope.querySelector('.t396__elem[data-elem-type="image"] img[src*="laptop"], .t396__elem[data-elem-type="image"] img[data-original*="laptop"]');
     if (!img) { return; }
@@ -105,34 +109,32 @@
     if ('ResizeObserver' in window) { new ResizeObserver(place).observe(img); }
 
     var v = scr.querySelector('video');
-    v.muted = true; v.defaultMuted = true; v.setAttribute('muted', ''); v.playsInline = true;
-    var loaded = false, want = false;
+    var anim = null, want = false, loaded = false;
+    function useAnim() {
+      if (anim) { return; }
+      anim = new Image();
+      anim.alt = ''; anim.decoding = 'async';
+      anim.src = ANIM;
+      if (v) { v.pause(); v.removeAttribute('src'); v.load(); v.remove(); v = null; }
+      scr.insertBefore(anim, scr.firstChild);
+    }
+    if (PHONE) { v.remove(); v = null; }
+    else { v.muted = true; v.defaultMuted = true; v.setAttribute('muted', ''); v.playsInline = true; }
     function play() {
+      if (!v) { return; }
       var p = v.play();
-      if (p && p.catch) { p.catch(function () { armGesture(); }); }
+      if (p && p.catch) { p.catch(function () { useAnim(); }); }   /* видео запрещено — показываем анимацию */
     }
     function on() {
       want = true;
+      if (!v) { useAnim(); return; }
       if (!loaded) { v.src = SRC; v.load(); loaded = true; }
       play();
     }
-    /* если браузер запретил автозапуск (например, режим энергосбережения на iPhone) —
-       запускаем при первом касании или клике на странице */
-    var armed = false;
-    function armGesture() {
-      if (armed) { return; }
-      armed = true;
-      var go = function () {
-        ['touchend', 'click', 'keydown'].forEach(function (t) { document.removeEventListener(t, go, true); });
-        armed = false;
-        if (want) { play(); }
-      };
-      ['touchend', 'click', 'keydown'].forEach(function (t) { document.addEventListener(t, go, true); });
-    }
     if ('IntersectionObserver' in window) {
       new IntersectionObserver(function (e) {
-        if (e[0].isIntersecting) { on(); } else if (loaded) { want = false; v.pause(); }
-      }, { rootMargin: '300px 0px' }).observe(scr);
+        if (e[0].isIntersecting) { on(); } else if (v && loaded) { want = false; v.pause(); }
+      }, { rootMargin: '400px 0px' }).observe(scr);
     } else { on(); }
     document.addEventListener('visibilitychange', function () { if (!document.hidden && want) { play(); } });
   })();
