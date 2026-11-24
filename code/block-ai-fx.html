@@ -20,6 +20,23 @@
     .t396__artboard:has(#adv-ai-fx) .t396__elem[data-elem-type="button"] .tn-atom { animation: none; }
     .adv-ai-fx canvas { display: none; }
   }
+  /* ===== Скринкаст на экране ноутбука (картинка laptop-tmp.webp, экран 386–1066 × 204–637 из 1446×918) ===== */
+  .t396__elem:has(.adv-ai-screen) .tn-atom { position: relative; }
+  .adv-ai-screen {
+    position: absolute; z-index: 2; pointer-events: none;
+    left: 26.694%; top: 22.222%; width: 47.095%; height: 47.277%;
+    overflow: hidden; background: #0b0c12;
+    border-radius: .75% .75% 0 0 / 1.15% 1.15% 0 0;
+  }
+  .adv-ai-screen video {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; object-position: 50% 0; display: block;
+  }
+  /* «чёлка» камеры поверх видео */
+  .adv-ai-screen i {
+    position: absolute; z-index: 1; top: 0; left: 43.17%; width: 13.36%; height: 2.8%;
+    background: #07080d; border-radius: 0 0 22% 22% / 0 0 100% 100%;
+  }
 </style>
 
 <div class="adv-ai-fx" id="adv-ai-fx" aria-hidden="true"><canvas></canvas></div>
@@ -40,6 +57,33 @@
       b.style.setProperty('--fl', (-1.3 * i) + 's');
     });
   }
+
+  /* скринкаст в экран ноутбука */
+  (function () {
+    var SRC = 'https://dashkoy1.github.io/advent-calendar/assets/ai/screencast.mp4?v=1';
+    var POSTER = 'https://dashkoy1.github.io/advent-calendar/assets/ai/screencast-poster.jpg?v=1';
+    var scope = ab || document;
+    var img = scope.querySelector('.t396__elem[data-elem-type="image"] img[src*="laptop"], .t396__elem[data-elem-type="image"] img[data-original*="laptop"]');
+    if (!img) { return; }
+    var atom = img.closest('.tn-atom');
+    if (!atom || atom.querySelector('.adv-ai-screen')) { return; }
+    var scr = document.createElement('div');
+    scr.className = 'adv-ai-screen';
+    scr.innerHTML = '<video muted loop playsinline preload="none" poster="' + POSTER + '"></video><i></i>';
+    atom.appendChild(scr);
+    var v = scr.querySelector('video');
+    v.muted = true; v.setAttribute('muted', '');
+    var loaded = false;
+    function on() {
+      if (!loaded) { v.src = SRC; loaded = true; }
+      var p = v.play(); if (p && p.catch) { p.catch(function () {}); }
+    }
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (e) {
+        if (e[0].isIntersecting) { on(); } else if (loaded) { v.pause(); }
+      }, { rootMargin: '300px 0px' }).observe(scr);
+    } else { on(); }
+  })();
 
   if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) { return; }
 
