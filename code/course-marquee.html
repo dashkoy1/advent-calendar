@@ -1,22 +1,23 @@
 <!-- =========================================================
      БЕГУЩАЯ СТРОКА ФОТО в блоке «курс».
-     • фото: файлы m-01.webp … m-10.webp на GitHub (assets/marquee); список повторён 2 раза — так строка бесшовная;
-     • скорость: --adv-mq-time (больше секунд — медленнее);
+     • фото: файлы m-01.webp … m-10.webp на GitHub (assets/marquee);
+     • скорость: SPEED ниже — сколько высот фото проезжает за секунду (больше — быстрее);
+     • строку можно листать: мышью (зажать и тянуть) и пальцем; после отпускания она едет дальше сама;
      • размер строки = размер этого HTML-элемента в Зеро (фото всегда во всю его высоту).
      ========================================================= -->
 <style>
   /* строка лежит поверх бежевой карточки (слой в Зеро может быть ниже — поднимаем тут) */
   .t396__elem:has(.adv-mq) { z-index: 20 !important; }
   .adv-mq {
-    --adv-mq-time: 90s;
     position: absolute; inset: 0; overflow: hidden;
     container-type: size;
+    cursor: grab; touch-action: pan-y; user-select: none; -webkit-user-select: none;
     -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 9%);
             mask-image: linear-gradient(90deg, transparent 0, #000 9%);
   }
+  .adv-mq.is-drag { cursor: grabbing; }
   .adv-mq__track {
     display: flex; height: 100%; width: max-content;
-    animation: adv-mq var(--adv-mq-time) linear infinite;
     will-change: transform;
   }
   .adv-mq__track img {
@@ -27,13 +28,9 @@
     object-fit: cover;
     -webkit-user-drag: none; user-select: none; pointer-events: none;
   }
-  @keyframes adv-mq { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(-50%, 0, 0); } }
   /* телефон и планшет: строка во всю ширину, без затухания слева */
   @media (max-width: 959px) {
     .adv-mq { -webkit-mask-image: none; mask-image: none; }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .adv-mq__track { animation-duration: 240s; }
   }
 </style>
 <div class="adv-mq" aria-hidden="true"><div class="adv-mq__track"></div></div>
@@ -41,15 +38,68 @@
 (function () {
   var BASE = 'https://dashkoy1.github.io/advent-calendar/assets/marquee/m-';
   var N = 10;
-  document.querySelectorAll('.adv-mq__track').forEach(function (track) {
-    if (track.children.length) { return; }
+  var V = 2;          // версия фото — увеличить, если заменили файлы на GitHub
+  var SPEED = 0.13;   // высот фото в секунду (было ≈0.09)
+
+  document.querySelectorAll('.adv-mq').forEach(function (box) {
+    var track = box.querySelector('.adv-mq__track');
+    if (!track || track.dataset.ready) { return; }
+    track.dataset.ready = '1';
     var html = '';
-    for (var r = 0; r < 2; r++) {
+    for (var r = 0; r < 3; r++) {
       for (var i = 1; i <= N; i++) {
-        html += '<img src="' + BASE + (i < 10 ? '0' + i : i) + '.webp" alt="" decoding="async" draggable="false">';
+        html += '<img src="' + BASE + (i < 10 ? '0' + i : i) + '.webp?v=' + V + '" alt="" decoding="async" draggable="false">';
       }
     }
     track.innerHTML = html;
+
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var x = 0, vel = 0, drag = false, lastX = 0, lastT = 0, moved = 0, prev = 0, visible = true;
+
+    function period() { return track.scrollWidth / 3; }
+    function wrap() {
+      var p = period(); if (!p) { return; }
+      while (x <= -p) { x += p; }
+      while (x > 0) { x -= p; }
+    }
+    function frame(t) {
+      var dt = prev ? Math.min((t - prev) / 1000, .05) : 0; prev = t;
+      if (!drag && visible) {
+        var auto = reduce ? 0 : -SPEED * box.clientHeight;
+        vel += (auto - vel) * Math.min(1, dt * 2.2);   // после броска плавно возвращаемся к своей скорости
+        x += vel * dt;
+      }
+      wrap();
+      track.style.transform = 'translate3d(' + x + 'px,0,0)';
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (e) { visible = e[0].isIntersecting; }).observe(box);
+    }
+
+    box.addEventListener('pointerdown', function (e) {
+      drag = true; moved = 0; lastX = e.clientX; lastT = performance.now(); vel = 0;
+      box.classList.add('is-drag');
+      if (box.setPointerCapture) { try { box.setPointerCapture(e.pointerId); } catch (err) {} }
+    });
+    box.addEventListener('pointermove', function (e) {
+      if (!drag) { return; }
+      var now = performance.now(), dx = e.clientX - lastX;
+      x += dx; moved += Math.abs(dx);
+      var dtm = Math.max(now - lastT, 1);
+      vel = vel * .6 + (dx / dtm * 1000) * .4;
+      lastX = e.clientX; lastT = now;
+    });
+    function end() {
+      if (!drag) { return; }
+      drag = false; box.classList.remove('is-drag');
+      vel = Math.max(-2500, Math.min(2500, vel));
+    }
+    box.addEventListener('pointerup', end);
+    box.addEventListener('pointercancel', end);
+    box.addEventListener('lostpointercapture', end);
   });
 })();
 </script>

@@ -165,13 +165,17 @@
   .adv-dp__timer span { display: block; margin-top: 2px; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: rgba(255, 255, 255, .55); }
   .adv-dp__btn {
     /* единый стиль по кнопке «Обсудить проект»: #3b507d → #445b8b, Manrope 12/700, разрядка 0.3px, скругление 12px */
-    display: flex; align-items: center; justify-content: center; gap: 4px; width: 100%; height: 60px;
-    border: 0; border-radius: 12px; cursor: pointer; text-decoration: none;
-    font: 700 12px/1 'Manrope', Arial, sans-serif; letter-spacing: .3px; text-transform: uppercase; color: #fff;
+    /* размер как у кнопок Зеро на этой ширине экрана: на ПК 79px@1200 и растёт с окном, на телефоне 81.5px@320 */
+    display: flex; align-items: center; justify-content: center; gap: .33em; width: 100%; height: max(79px, 6.58vw);
+    border: 0; border-radius: max(12px, 1vw); cursor: pointer; text-decoration: none;
+    font: 700 max(12px, 1vw)/1 'Manrope', Arial, sans-serif; letter-spacing: .025em; text-transform: uppercase; color: #fff;
     background-color: #3b507d; box-shadow: 0 28px 25.5px -18.5px rgba(0, 0, 0, .3);
     transition: background-color .3s ease, transform .2s ease;
   }
-  .adv-dp__btn img { width: 10px; height: auto; display: block; flex: none; }
+  .adv-dp__btn img, .adv-dp__btn svg { width: .83em; height: auto; display: block; flex: none; }
+  @media (max-width: 959px) {
+    .adv-dp__btn { height: min(25.47vw, 122px); border-radius: min(4.06vw, 20px); font-size: min(3.75vw, 18px); }
+  }
   .adv-dp__btn:hover { background-color: #445b8b; }
   .adv-dp__btn:active { transform: scale(.98); }
   .adv-dp__btn[hidden] { display: none; }
