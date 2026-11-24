@@ -5,7 +5,8 @@
      • размер строки = размер этого HTML-элемента в Зеро (фото всегда во всю его высоту).
      ========================================================= -->
 <style>
-  .t396__elem:has(> .tn-atom > .adv-mq), .t396__elem:has(.adv-mq) { overflow: visible; }
+  /* строка лежит поверх бежевой карточки (слой в Зеро может быть ниже — поднимаем тут) */
+  .t396__elem:has(.adv-mq) { z-index: 20 !important; }
   .adv-mq {
     --adv-mq-time: 90s;
     position: absolute; inset: 0; overflow: hidden;
