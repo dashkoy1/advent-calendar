@@ -1,0 +1,60 @@
+<!-- =========================================================
+     ПОП-АП ДНЯ 4. Что можно менять:
+     • data-day="4" — номер дня (у каждой копии свой);
+     • дата и тег — в двух <span class="adv-pop__tag">;
+     • заголовок и описание — в <h3> и <p>, перенос строки — <br>;
+     • фото: телефон — в <source srcset="…">, ПК — в <img src="…">;
+     • ссылка на подарок — в href у кнопки «Открыть подарок дня» (пока "#" — кнопка пишет «скоро»).
+     Остальное (оформление, таймер, закрытие) — в основном блоке поп-апа, здесь не трогаем.
+     ========================================================= -->
+<div class="adv-pop-anchor" hidden></div>
+<div class="adv-pop-ov" data-day="4" role="dialog" aria-modal="true" aria-label="Подарок дня 4" aria-hidden="true">
+  <div class="adv-pop-ov__bg"></div>
+  <button class="adv-pop-ov__close" type="button" aria-label="Закрыть"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  <div class="adv-pop-ov__scroll">
+  <div class="adv-pop-ov__sheet">
+  <div class="adv-pop-ov__grip"></div>
+<section class="adv-pop" aria-label="Подарок дня 4">
+  <div class="adv-pop__wrap">
+
+    <div class="adv-pop__share">
+      <a class="adv-pop__btn adv-pop__share-btn" href="#share">Поделиться календарем</a>
+      <p class="adv-pop__share-text">
+        <span class="d" style="color:#fff">Поделись этим <span>Advent-календарем</span><br>с друзьями и коллегами 🤍</span>
+        <span class="m">Поделись Advent-<br>календарем с друзьями →</span>
+      </p>
+    </div>
+
+    <div class="adv-pop__card">
+      <picture>
+        <source media="(max-width: 1099px)" srcset="https://dashkoy1.github.io/advent-calendar/assets/popup/days/day-04-m.webp">
+        <img class="adv-pop__bg" src="https://dashkoy1.github.io/advent-calendar/assets/popup/days/day-04-d.webp" alt="" loading="lazy" decoding="async">
+      </picture>
+      <div class="adv-pop__tags">
+        <span class="adv-pop__tag adv-pop__tag--date"><img src="https://dashkoy1.github.io/advent-calendar/assets/popup/cal.svg" alt="" width="13" height="14">4 декабря</span>
+        <span class="adv-pop__tag">#подборка</span>
+      </div>
+      <h3 class="adv-pop__title">Роскошные<br>зимние палитры</h3>
+      <p class="adv-pop__desc">А еще сделали шпаргалку, которая<br>поможет вам создавать вау-<br>визуал, как в кино</p>
+      <a class="adv-pop__btn adv-pop__gift" href="#" data-adv-gift><img src="https://dashkoy1.github.io/advent-calendar/assets/img/gift.svg" alt="" width="17" height="16">Открыть подарок дня</a>
+    </div>
+
+    <div class="adv-pop__promo">
+      <a class="adv-pop__btn adv-pop__more" href="https://mono-webdesign.ru/ai_course" target="_blank" rel="noopener">Узнать подробнее</a>
+      <p class="adv-pop__promo-text">
+        <span class="adv-pop__promo-title">Если вы тоже хотите создавать<br> ВАУ-сайты, фото и видео через ИИ<span class="m">,</span></span>
+        <span class="adv-pop__promo-sub"><img src="https://dashkoy1.github.io/advent-calendar/assets/popup/arrow.svg" alt="" width="25" height="15"><span class="d">то приходите к нам на обучение</span><span class="m">то приходите к нам на обучение →</span></span>
+      </p>
+      <div class="adv-pop__photos" aria-hidden="true">
+        <span class="adv-pop__photo adv-pop__photo--1"><img src="https://dashkoy1.github.io/advent-calendar/assets/popup/promo-m-1.webp" alt="" loading="lazy"></span>
+        <span class="adv-pop__photo adv-pop__photo--2"><img src="https://dashkoy1.github.io/advent-calendar/assets/popup/promo-m-2.webp" alt="" loading="lazy"></span>
+        <span class="adv-pop__photo adv-pop__photo--3"><img src="https://dashkoy1.github.io/advent-calendar/assets/popup/promo-m-3.webp" alt="" loading="lazy"></span>
+      </div>
+    </div>
+    <a class="adv-pop__btn adv-pop__more adv-pop__more--m" href="https://mono-webdesign.ru/ai_course" target="_blank" rel="noopener">Узнать подробнее</a>
+
+  </div>
+</section>
+  </div>
+  </div>
+</div>
