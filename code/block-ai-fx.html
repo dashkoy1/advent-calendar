@@ -21,7 +21,6 @@
     .adv-ai-fx canvas { display: none; }
   }
   /* ===== Скринкаст на экране ноутбука (картинка laptop-tmp.webp, экран 386–1066 × 204–637 из 1446×918) ===== */
-  .t396__elem:has(.adv-ai-screen) .tn-atom { position: relative; }
   .adv-ai-screen {
     position: absolute; z-index: 2; pointer-events: none;
     left: 26.45%; top: 21.73%; width: 47.51%; height: 48.09%; /* запасной вариант, обычно считает скрипт */
@@ -58,55 +57,81 @@
     });
   }
 
-  /* скринкаст в экран ноутбука */
+  /* скринкаст в экран ноутбука.
+     Видео кладём не внутрь картинки, а прямо в артборд поверх неё: на телефоне Тильда масштабирует
+     элементы через zoom, и Safari внутри такого элемента видео может не показывать. */
   (function () {
-    var SRC = 'https://dashkoy1.github.io/advent-calendar/assets/ai/screencast.mp4?v=1';
-    var POSTER = 'https://dashkoy1.github.io/advent-calendar/assets/ai/screencast-poster.jpg?v=1';
+    var SRC = 'https://dashkoy1.github.io/advent-calendar/assets/ai/screencast.mp4?v=2';
+    var POSTER = 'https://dashkoy1.github.io/advent-calendar/assets/ai/screencast-poster.jpg?v=2';
     var scope = ab || document;
     var img = scope.querySelector('.t396__elem[data-elem-type="image"] img[src*="laptop"], .t396__elem[data-elem-type="image"] img[data-original*="laptop"]');
     if (!img) { return; }
-    var atom = img.closest('.tn-atom');
-    if (!atom || atom.querySelector('.adv-ai-screen')) { return; }
+    var lap = img.closest('.t396__elem');
+    var host = lap.parentNode;
+    if (host.querySelector('.adv-ai-screen')) { return; }
     var scr = document.createElement('div');
     scr.className = 'adv-ai-screen';
-    scr.innerHTML = '<video muted loop playsinline preload="none" poster="' + POSTER + '"></video><i></i>';
-    atom.appendChild(scr);
-    /* экран считаем по реальному виду картинки: на телефоне Тильда обрезает её (object-fit: cover) */
-    var SX = 382.5, SY = 199.5, SW = 687, SH = 441.5, NW = 1446, NH = 918;  /* с запасом ~2px на рамку, чтобы не просвечивал белый край */
+    scr.innerHTML = '<video muted autoplay loop playsinline webkit-playsinline disablepictureinpicture preload="none" poster="' + POSTER + '"></video><i></i>';
+    host.insertBefore(scr, lap.nextSibling);   /* сразу над ноутбуком, но под карточкой профиля и снегом */
+
+    /* экран в картинке (px исходника 1446×918), с запасом ~2px на рамку */
+    var SX = 382.5, SY = 199.5, SW = 687, SH = 441.5, NW = 1446, NH = 918;
     function place() {
-      var W = atom.clientWidth, H = atom.clientHeight;
+      var hr = host.getBoundingClientRect(), r = img.getBoundingClientRect();
+      var W = r.width, H = r.height;
       if (!W || !H) { return; }
-      var cs = getComputedStyle(img), fit = cs.objectFit;
-      var k, ox = 0, oy = 0;
+      var cs = getComputedStyle(img), fit = cs.objectFit, k, ox = 0, oy = 0;
       if (fit === 'cover' || fit === 'contain') {
         k = fit === 'cover' ? Math.max(W / NW, H / NH) : Math.min(W / NW, H / NH);
         var pos = (cs.objectPosition || '50% 50%').split(' ');
         var px = parseFloat(pos[0]) / 100, py = parseFloat(pos[1] || pos[0]) / 100;
         if (isNaN(px)) { px = .5; } if (isNaN(py)) { py = .5; }
         ox = (W - NW * k) * px; oy = (H - NH * k) * py;
-        scr.style.left = (ox + SX * k) + 'px'; scr.style.top = (oy + SY * k) + 'px';
-        scr.style.width = (SW * k) + 'px'; scr.style.height = (SH * k) + 'px';
-      } else {
-        scr.style.left = scr.style.top = scr.style.width = scr.style.height = '';
-      }
+      } else { k = W / NW; }
+      scr.style.left = (r.left - hr.left + ox + SX * k) + 'px';
+      scr.style.top = (r.top - hr.top + oy + SY * k) + 'px';
+      scr.style.width = (SW * k) + 'px';
+      scr.style.height = (SH * k) + 'px';
+      scr.style.zIndex = getComputedStyle(lap).zIndex;
     }
     place();
-    if (img.complete) { place(); } else { img.addEventListener('load', place); }
-    window.addEventListener('resize', function () { setTimeout(place, 120); });
+    if (!img.complete) { img.addEventListener('load', place); }
+    window.addEventListener('resize', function () { setTimeout(place, 150); });
+    window.addEventListener('orientationchange', function () { setTimeout(place, 300); });
     window.addEventListener('load', place);
-    if ('ResizeObserver' in window) { new ResizeObserver(place).observe(atom); }
+    if ('ResizeObserver' in window) { new ResizeObserver(place).observe(img); }
+
     var v = scr.querySelector('video');
-    v.muted = true; v.setAttribute('muted', '');
-    var loaded = false;
+    v.muted = true; v.defaultMuted = true; v.setAttribute('muted', ''); v.playsInline = true;
+    var loaded = false, want = false;
+    function play() {
+      var p = v.play();
+      if (p && p.catch) { p.catch(function () { armGesture(); }); }
+    }
     function on() {
-      if (!loaded) { v.src = SRC; loaded = true; }
-      var p = v.play(); if (p && p.catch) { p.catch(function () {}); }
+      want = true;
+      if (!loaded) { v.src = SRC; v.load(); loaded = true; }
+      play();
+    }
+    /* если браузер запретил автозапуск (например, режим энергосбережения на iPhone) —
+       запускаем при первом касании или клике на странице */
+    var armed = false;
+    function armGesture() {
+      if (armed) { return; }
+      armed = true;
+      var go = function () {
+        ['touchend', 'click', 'keydown'].forEach(function (t) { document.removeEventListener(t, go, true); });
+        armed = false;
+        if (want) { play(); }
+      };
+      ['touchend', 'click', 'keydown'].forEach(function (t) { document.addEventListener(t, go, true); });
     }
     if ('IntersectionObserver' in window) {
       new IntersectionObserver(function (e) {
-        if (e[0].isIntersecting) { on(); } else if (loaded) { v.pause(); }
+        if (e[0].isIntersecting) { on(); } else if (loaded) { want = false; v.pause(); }
       }, { rootMargin: '300px 0px' }).observe(scr);
     } else { on(); }
+    document.addEventListener('visibilitychange', function () { if (!document.hidden && want) { play(); } });
   })();
 
   if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) { return; }
