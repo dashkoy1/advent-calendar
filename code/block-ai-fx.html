@@ -24,9 +24,9 @@
   .t396__elem:has(.adv-ai-screen) .tn-atom { position: relative; }
   .adv-ai-screen {
     position: absolute; z-index: 2; pointer-events: none;
-    left: 26.62%; top: 21.95%; width: 47.24%; height: 47.6%; /* запасной вариант, обычно считает скрипт */
+    left: 26.45%; top: 21.73%; width: 47.51%; height: 48.09%; /* запасной вариант, обычно считает скрипт */
     overflow: hidden; background: #0b0c12;
-    border-radius: .75% .75% 0 0 / 1.15% 1.15% 0 0;
+    border-radius: 1% 1% .4% .4% / 1.6% 1.6% .6% .6%;
   }
   .adv-ai-screen video {
     position: absolute; inset: 0; width: 100%; height: 100%;
@@ -34,7 +34,7 @@
   }
   /* «чёлка» камеры поверх видео */
   .adv-ai-screen i {
-    position: absolute; z-index: 1; top: 0; left: 43.17%; width: 13.36%; height: 2.8%;
+    position: absolute; z-index: 1; top: 0; left: 43.33%; width: 13.25%; height: 3.2%;
     background: #07080d; border-radius: 0 0 22% 22% / 0 0 100% 100%;
   }
 </style>
@@ -72,7 +72,7 @@
     scr.innerHTML = '<video muted loop playsinline preload="none" poster="' + POSTER + '"></video><i></i>';
     atom.appendChild(scr);
     /* экран считаем по реальному виду картинки: на телефоне Тильда обрезает её (object-fit: cover) */
-    var SX = 384.9, SY = 201.5, SW = 683.1, SH = 437, NW = 1446, NH = 918;
+    var SX = 382.5, SY = 199.5, SW = 687, SH = 441.5, NW = 1446, NH = 918;  /* с запасом ~2px на рамку, чтобы не просвечивал белый край */
     function place() {
       var W = atom.clientWidth, H = atom.clientHeight;
       if (!W || !H) { return; }
